@@ -1,0 +1,297 @@
+{
+  "slug": "servidor-seguro",
+  "num": 5,
+  "menu": "Servidor",
+  "titulo": "Servidor MCP seguro: audiencia, scope mínimo, handle ligado al usuario y secreto fuera del repo",
+  "titulo_curto": "Servidor MCP seguro",
+  "minutos": 20,
+  "lead": "El OAuth del servidor lo armaste en el curso 1. Aquí está el otro lado: seis ataques de la lista de seguridad de MCP (revisión 2026-07-28) contra el mismo servidor, escrito de dos formas. Ves qué bloquea el SDK oficial por sí solo y qué solo bloquea si lo configuras.",
+  "objetivo": "ejecutar 6 ataques contra un servidor MCP débil y uno seguro, y separar lo que el SDK bloquea por sí solo de lo que depende de tu configuración.",
+  "competencias": [
+    "conferir-audiencia-do-token",
+    "prender-handle-ao-usuario",
+    "aplicar-escopo-minimo-com-step-up",
+    "manter-segredo-fora-do-repositorio"
+  ],
+  "aprende": [
+    {
+      "icone": "portao",
+      "t": "Host y Origin: el DNS rebinding contra un servidor local"
+    },
+    {
+      "icone": "cadeado",
+      "t": "Token solo en el encabezado, con vencimiento y para este servidor (audiencia)"
+    },
+    {
+      "icone": "escudo",
+      "t": "Scope mínimo al entrar y scope de la acción solo cuando se pide"
+    },
+    {
+      "icone": "chip",
+      "t": "Sin sesión en MCP 2026-07-28: el handle de estado no es un login"
+    }
+  ],
+  "hero_alt": "Pequeño servidor en un rack con candado físico y cable de red conectado, mesa oscura y luz neutra.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "Las cinco puertas de un pedido",
+      "sub": "Un pedido al servidor pasa por estas puertas, en este orden. Haz clic en cada una.",
+      "nos": [
+        {
+          "icone": "portao",
+          "titulo": "Host",
+          "sub": "y Origin",
+          "detalhe": "Una página externa puede hablar con un servidor en 127.0.0.1 por DNS rebinding. Las guardas <code>localhostHostValidation</code> y <code>localhostOriginValidation</code> de <code>@modelcontextprotocol/node</code> lo rechazan con 403 antes de todo. Tú las activas."
+        },
+        {
+          "icone": "cadeado",
+          "titulo": "Token",
+          "sub": "encabezado",
+          "detalhe": "El SDK solo lee <code>Authorization: Bearer</code>; un token en la URL no entra (la spec prohíbe el query string). Token sin vencimiento o vencido: 401. Lo hace el SDK."
+        },
+        {
+          "icone": "alvo",
+          "titulo": "Audiencia",
+          "sub": "este servidor",
+          "forte": true,
+          "detalhe": "La spec lo manda: \"MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server\". En el SDK esto solo ocurre si pasas <code>expectedResource</code>. Tú lo activas."
+        },
+        {
+          "icone": "escudo",
+          "titulo": "Scope",
+          "sub": "de la tool",
+          "detalhe": "Entrar pide solo <code>mentorias:ler</code>. La acción pide <code>mentorias:agendar</code> con <code>scopeChallenge: requireScopes(...)</code>, y el 403 trae el scope que falta (step-up). Tú lo declaras, el SDK lo hace."
+        },
+        {
+          "icone": "usuario",
+          "titulo": "Handle",
+          "sub": "del usuario",
+          "detalhe": "La revisión 2026-07-28 no tiene sesión. El borrador, el carrito o el flujo tienen un handle que vuelve como argumento. Tener el handle no es estar logueado: verifica el dueño por el token. Tú lo escribes."
+        }
+      ],
+      "legenda": "Verificado en el código de @modelcontextprotocol/server 2.3.1 (dist/) y en la página security_best_practices de la revisión 2026-07-28."
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Seis ataques, servidor débil",
+      "sub": "El mismo servidor con los errores comunes: acepta el token en la URL, no verifica la audiencia, no pide scope en la acción y usa un handle secuencial sin dueño. Tokens generados al momento; nada en el repositorio.",
+      "blocos": [
+        {
+          "rot": "Terminal · fraco",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/atacar-mcp.mjs fraco; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: fraco\nbloqueado 1 · Host de fora (DNS rebinding) → HTTP 401 (o token barrou; servidor sem token cairia)\nPASSOU    2 · token na query string → aceito\nPASSOU    3 · token de outro recurso → aceito\nPASSOU    4 · escopo de leitura confirma agendamento → agendado: m-101 para ana\nPASSOU    5 · handle de outro usuário → agendado: m-102 para ana\nbloqueado 6 · token vencido → invalid_token: Token has expired\npassaram: 4 de 6\nsaída: 1</pre><p>El ataque 1 se detuvo en el token: un servidor local sin token caería. El 6 el SDK siempre lo bloquea. Los cuatro del medio dependen de ti.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Los mismos seis, servidor seguro",
+      "sub": "Las diferencias están marcadas con seguro en el archivo del servidor.",
+      "blocos": [
+        {
+          "rot": "Terminal · seguro",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/atacar-mcp.mjs seguro; echo \"saída: $?\""
+        },
+        {
+          "rot": "Archivo · kit/mcp/servidor.mjs",
+          "icone": "arquivo",
+          "conteudo": "// servidor.mjs — servidor MCP por HTTP (revisión 2026-07-28, SDK oficial v2 2.3.1) de dos formas:\n//   seguro → como lo indica la lección 5;   fraco → errores comunes, para que los ataques tengan dónde acertar.\n// Servicio ficticio de mentorías, datos en memoria. No llama a modelos ni a servicios de pago.\n// Los tokens NO quedan aquí: quien llama pasa la tabla de tokens (en el kit, generada al momento con crypto.randomBytes).\nimport { createServer as criarHttp } from 'node:http';\nimport { randomBytes, timingSafeEqual } from 'node:crypto';\nimport { McpServer, createMcpHandler, requireBearerAuth, requireScopes, getOAuthProtectedResourceMetadataUrl, OAuthError, OAuthErrorCode } from '@modelcontextprotocol/server';\nimport { toNodeHandler, localhostHostValidation, localhostOriginValidation } from '@modelcontextprotocol/node';\nimport * as z from 'zod/v4';\n\nconst MENTORIAS = [\n  { id: 'm-101', titulo: 'Revisar as ferramentas da sua página', vagas: 2 },\n  { id: 'm-102', titulo: 'Servidor MCP com token', vagas: 1 }\n];\n\nexport function criarServidorMcp({ seguro }) {\n  const rascunhos = new Map();       // handle → { dono, mentoria }\n  let seq = 0;\n  // seguro: handle aleatorio e impredecible; fraco: secuencial (r1, r2…), fácil de adivinar\n  const novoHandle = () => seguro ? randomBytes(16).toString('hex') : `r${++seq}`;\n  const usuario = ctx => ctx.http?.authInfo?.extra?.usuario;       // viene del token verificado, nunca del cliente\n\n  return function criar() {\n    const server = new McpServer({ name: 'mentorias', version: '1.0.0' });\n\n    server.registerTool('ver_mentorias', {\n      description: 'Lista as mentorias com vaga. Só lê.',\n      inputSchema: z.object({}),\n      annotations: { readOnlyHint: true }\n    }, async () => ({ content: [{ type: 'text', text: MENTORIAS.map(m => `${m.id} · ${m.titulo} · ${m.vagas} vagas`).join('\\n') }] }));\n\n    server.registerTool('criar_rascunho', {\n      description: 'Começa um agendamento e devolve o código do rascunho, que vai nas próximas chamadas.',\n      inputSchema: z.object({ mentoria: z.string().regex(/^m-[0-9]{3}$/) }),\n      annotations: { readOnlyHint: false }\n    }, async ({ mentoria }, ctx) => {\n      const h = novoHandle();\n      rascunhos.set(h, { dono: usuario(ctx), mentoria });\n      return { content: [{ type: 'text', text: h }] };\n    });\n\n    server.registerTool('ver_rascunho', {\n      description: 'Mostra um rascunho de agendamento pelo código.',\n      inputSchema: z.object({ rascunho: z.string().max(64) }),\n      annotations: { readOnlyHint: true }\n    }, async ({ rascunho }, ctx) => {\n      const r = rascunhos.get(rascunho);\n      // MCP 2026-07-28 no tiene sesión: tener el handle NO es estar autenticado. Verifica el dueño.\n      if (!r || (seguro && r.dono !== usuario(ctx))) return { content: [{ type: 'text', text: 'rascunho não encontrado' }], isError: true };\n      return { content: [{ type: 'text', text: `rascunho de ${r.dono} para ${r.mentoria}` }] };\n    });\n\n    server.registerTool('confirmar_agendamento', {\n      description: 'Confirma o agendamento de um rascunho. Tem consequência: ocupa uma vaga.',\n      inputSchema: z.object({ rascunho: z.string().max(64) }),\n      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },\n      // seguro: este scope solo aparece cuando se pide la acción (step-up); fraco: cualquier token sirve\n      ...(seguro && { scopeChallenge: requireScopes('mentorias:agendar') })\n    }, async ({ rascunho }, ctx) => {\n      const r = rascunhos.get(rascunho);\n      if (!r || (seguro && r.dono !== usuario(ctx))) return { content: [{ type: 'text', text: 'rascunho não encontrado' }], isError: true };\n      rascunhos.delete(rascunho);\n      return { content: [{ type: 'text', text: `agendado: ${r.mentoria} para ${r.dono}` }] };\n    });\n\n    return server;\n  };\n}\n\n// Levanta el servidor HTTP en 127.0.0.1. tokens = { <token>: { usuario, escopos, recurso?, expira? } }\nexport async function subir({ seguro, tokens, porta = 0 }) {\n  const http = criarHttp();\n  await new Promise(ok => http.listen(porta, '127.0.0.1', ok));\n  const URL_MCP = new URL(`http://127.0.0.1:${http.address().port}/mcp`);\n  const igual = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));\n  const verifier = {\n    async verifyAccessToken(token) {\n      const chave = Object.keys(tokens).find(k => igual(k, token));\n      if (!chave) throw new OAuthError(OAuthErrorCode.InvalidToken, 'token desconhecido');\n      const t = tokens[chave];\n      return { token, clientId: t.usuario, scopes: t.escopos, expiresAt: t.expira ?? Math.floor(Date.now() / 1000) + 600,\n        resource: new URL(t.recurso ?? URL_MCP), extra: { usuario: t.usuario } };\n    }\n  };\n  const portao = requireBearerAuth({\n    verifier,\n    requiredScopes: ['mentorias:ler'],                                    // scope mínimo para entrar\n    resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(URL_MCP),\n    ...(seguro && { expectedResource: URL_MCP })                          // seguro: el token tiene que ser PARA este servidor\n  });\n  const mcp = createMcpHandler(criarServidorMcp({ seguro }));\n  const app = toNodeHandler({\n    async fetch(request) {\n      if (!seguro) {\n        // ERROR COMÚN: aceptar el token en la URL (queda en logs, historial y Referer). La spec lo prohíbe.\n        const t = new URL(request.url).searchParams.get('access_token');\n        if (t && !request.headers.get('authorization')) {\n          const h = new Headers(request.headers); h.set('authorization', `Bearer ${t}`);\n          request = new Request(request, { headers: h });\n        }\n      }\n      const auth = await portao(request);\n      if (auth instanceof Response) return auth;                            // 401 / 403 con WWW-Authenticate\n      return mcp.fetch(request, { authInfo: auth });\n    }\n  });\n  const hostOk = localhostHostValidation(), origemOk = localhostOriginValidation();\n  http.on('request', (req, res) => {\n    // seguro: rechaza Host/Origin de fuera (DNS rebinding) ANTES de cualquier otra cosa\n    if (seguro && (!hostOk(req, res) || !origemOk(req, res))) return;\n    void app(req, res);\n  });\n  return { url: URL_MCP, fechar: async () => { await mcp.close?.(); await new Promise(f => http.close(f)); } };\n}"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: seguro\nbloqueado 1 · Host de fora (DNS rebinding) → HTTP 403 (Host recusado antes do token)\nbloqueado 2 · token na query string → invalid_token: Missing Authorization header\nbloqueado 3 · token de outro recurso → invalid_token: Token was not issued for this resource\nbloqueado 4 · escopo de leitura confirma agendamento → Insufficient scope: required \"mentorias:agendar\"\nbloqueado 5 · handle de outro usuário → rascunho não encontrado\nbloqueado 6 · token vencido → invalid_token: Token has expired\npassaram: 0 de 6\nsaída: 0</pre><p>Cada rechazo viene de un lugar: Host (guarda del adaptador Node), token y audiencia (SDK, con <code>expectedResource</code>), scope (<code>requireScopes</code>), handle (tu código).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Qué es de quién",
+      "passos": [
+        {
+          "titulo": "El SDK hace",
+          "texto": [
+            "Lee el token solo del encabezado, rechaza el token sin vigencia o vencido y responde 403 con el scope que falta cuando la tool declara <code>requireScopes</code>."
+          ]
+        },
+        {
+          "titulo": "Tú activas",
+          "texto": [
+            "<code>expectedResource</code> (audiencia), las guardas de Host y Origin, el servidor en 127.0.0.1 y el scope por tool. Servidor local que solo usa tu agente: stdio, que ni siquiera abre un puerto."
+          ]
+        },
+        {
+          "titulo": "Tú escribes",
+          "texto": [
+            "Handle aleatorio (<code>randomBytes</code>) y atado al usuario del token. La spec: \"MUST NOT treat possession of a state handle as authentication\"."
+          ]
+        },
+        {
+          "titulo": "Nunca",
+          "texto": [
+            "Reenviar el token del cliente a otra API (token passthrough, prohibido por la spec) ni guardar secretos en un archivo del repositorio. El cliente también guarda la credencial por emisor y no la reutiliza con otro servidor de autorización (cambio de la 2026-07-28)."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Secretos fuera del repositorio",
+      "sub": "Un verificador mínimo (no reemplaza a gitleaks ni al secret scanning de GitHub). El segundo comando planta una clave falsa en una carpeta de ensayo para que veas la alerta.",
+      "blocos": [
+        {
+          "rot": "Terminal · segredos",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/segredos.mjs .; echo \"saída: $?\"\nE=${TMPDIR:-/tmp}/ensaio-seguranca/vazou; mkdir -p $E\nprintf \"export const API_KEY = '%s';\\n\" $(openssl rand -hex 16) > $E/config.mjs\nnode scripts/segredos.mjs $E; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>70 arquivos lidos · 0 segredos\nsaída: 0\nSEGREDO config.mjs:1: segredo atribuído no código (API_KEY = 'a…)\n1 arquivo lido · 1 segredo\nsaída: 1</pre><p>El kit pasa limpio; la carpeta de ensayo acusa la clave escrita en el código.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Práctica",
+      "sub": "Ataque, defensa y tu repositorio.",
+      "exercicios": [
+        {
+          "id": "e13",
+          "titulo": "E13 · Servidor fraco",
+          "min": "5 min",
+          "texto": "Ejecuta el bloque <b>fraco</b> y anota cuáles cuatro ataques pasaron.",
+          "pronto": "<code>passaram: 4 de 6</code> y <code>saída: 1</code>."
+        },
+        {
+          "id": "e14",
+          "titulo": "E14 · Servidor seguro",
+          "min": "10 min",
+          "texto": "Ejecuta el bloque <b>seguro</b>. Después, en <code>mcp/servidor.mjs</code>, quita <code>expectedResource</code> del modo seguro y ejecútalo de nuevo. Deshaz el cambio al final.",
+          "pronto": "<code>passaram: 0 de 6</code>; sin <code>expectedResource</code>, <code>PASSOU    3 · token de outro recurso</code>."
+        },
+        {
+          "id": "e15",
+          "titulo": "E15 · Tu repositorio",
+          "min": "10 min",
+          "texto": "Ejecuta el verificador en el repositorio de tu servidor o sitio.",
+          "pronto": "<code>node scripts/segredos.mjs [carpeta de tu repositorio]</code> → <code>0 segredos</code> y <code>saída: 0</code>."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Prueba de la clase",
+      "perguntas": [
+        {
+          "p": "Un token emitido para otro servicio del mismo proveedor llega a tu servidor. En el SDK 2.3.1, ¿qué hace que sea rechazado?",
+          "opcoes": [
+            "Nada: el SDK siempre rechaza el token de otro servicio",
+            "La guarda de Host y Origin del adaptador Node, activada por defecto",
+            "El expectedResource que le pasas a requireBearerAuth",
+            "El requireScopes declarado en la tool de lectura"
+          ],
+          "certa": 2,
+          "explica": "El SDK solo compara la audiencia si configuras expectedResource (y el verificador devuelve resource). El ataque 3 pasó en el servidor fraco por eso.",
+          "ref": "diagrama",
+          "cert": true
+        },
+        {
+          "p": "Bruno manda el código del borrador de Ana y confirma la reserva. ¿Qué regla de MCP 2026-07-28 rompe esto?",
+          "opcoes": [
+            "Tener el handle de estado no es autenticación",
+            "El token tiene que venir en el encabezado",
+            "La tool necesita un outputSchema",
+            "El servidor necesita responder server/discover"
+          ],
+          "certa": 0,
+          "explica": "Sin sesión en el protocolo, el estado vive en handles. El servidor verifica el dueño por el token, nunca por la posesión del handle.",
+          "ref": "passos"
+        },
+        {
+          "p": "¿Cuál de estas hace el SDK sin que configures nada?",
+          "opcoes": [
+            "Verificar que el token fue emitido para este servidor",
+            "Rechazar Host externo para frenar DNS rebinding",
+            "Generar handles aleatorios para los borradores",
+            "Ignorar el token enviado en el query string de la URL"
+          ],
+          "certa": 3,
+          "explica": "verifyBearerToken solo lee el encabezado Authorization. La audiencia y el Host los activas tú; el handle lo escribes tú.",
+          "ref": "passos"
+        },
+        {
+          "p": "¿Por qué el servidor del kit pide solo mentorias:ler para entrar?",
+          "opcoes": [
+            "Porque el SDK ya no acepta más de un scope dentro del mismo token",
+            "Para que el token común no reserve: la acción pide su propio scope",
+            "Porque el scope de escritura solo existe en el transporte stdio",
+            "Para que el cliente se salte la pantalla de consentimiento"
+          ],
+          "certa": 1,
+          "explica": "Scope mínimo al entrar y el scope de la acción solo cuando se pide. Un token de lectura filtrado no reserva nada.",
+          "ref": "diagrama"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "En tres frases",
+      "itens": [
+        {
+          "t": "SDK",
+          "texto": "Encabezado, vigencia y scope declarado: eso lo hace él."
+        },
+        {
+          "t": "Tú",
+          "texto": "Audiencia, Host/Origin, handle con dueño y nada de passthrough."
+        },
+        {
+          "t": "Secreto",
+          "texto": "En el entorno, nunca en el repositorio; revisa antes de publicar."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir más allá",
+      "links": [
+        {
+          "t": "MCP 2026-07-28: Security Best Practices",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/security_best_practices"
+        },
+        {
+          "t": "MCP 2026-07-28: Authorization",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization"
+        },
+        {
+          "t": "MCP 2026-07-28: changelog",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/changelog"
+        },
+        {
+          "t": "Curso 1: autorización con OAuth (el lado de la construcción)",
+          "href": "https://inematds.github.io/formacao-webmcp-mcp-v72/es/aulas/autorizacao/"
+        }
+      ]
+    }
+  ]
+}

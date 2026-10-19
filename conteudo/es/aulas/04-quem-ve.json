@@ -1,0 +1,280 @@
+{
+  "slug": "quem-ve",
+  "num": 4,
+  "menu": "Exposición",
+  "titulo": "Quién ve la tool: mismo origin, exposedTo, iframes y Permissions-Policy",
+  "titulo_curto": "Quién ve la tool",
+  "minutos": 18,
+  "lead": "Por defecto, solo la propia página y las del mismo origin ven la tool. Un iframe de otro origin solo aparece para la página superior con tres consentimientos, y un encabezado lo apaga todo. En esta lección mides los siete casos en Chromium y pones Permissions-Policy: tools=() en las páginas que no necesitan WebMCP.",
+  "objetivo": "medir quién ve cada tool (mismo origin, iframe, exposedTo, fromOrigins) y apagar WebMCP con Permissions-Policy donde no debe existir.",
+  "competencias": [
+    "explicar-exposicao-por-origem",
+    "configurar-exposedTo-e-allow-tools",
+    "aplicar-permissions-policy-tools"
+  ],
+  "aprende": [
+    {
+      "icone": "camadas",
+      "t": "Origen = esquema + host + puerto, y el patrón de exposición de la spec"
+    },
+    {
+      "icone": "cadeado",
+      "t": "Los tres consentimientos del iframe: allow=\"tools\", exposedTo y fromOrigins"
+    },
+    {
+      "icone": "portao",
+      "t": "Permissions-Policy: tools=() desactiva la API antes de cualquier script"
+    },
+    {
+      "icone": "terminal",
+      "t": "Siete casos medidos en Chromium 156 contra la spec del 16 de octubre de 2026"
+    }
+  ],
+  "hero_alt": "Dos ventanas de navegador superpuestas en un monitor oscuro, una dentro de la otra, con un conector entre ellas.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "Los cuatro controles de exposición",
+      "sub": "Haz clic en cada uno. Top = la página principal; iframe = una página de otro origen dentro de ella.",
+      "nos": [
+        {
+          "icone": "portao",
+          "titulo": "Policy",
+          "sub": "encabezado",
+          "detalhe": "<code>Permissions-Policy: tools=()</code> en la respuesta del servidor deja a la página y a todos sus iframes sin la API: <code>registerTool</code> y <code>getTools</code> fallan con <code>NotAllowedError</code>. El valor por defecto de la feature <code>tools</code> es <code>'self'</code> (§4.4)."
+        },
+        {
+          "icone": "cadeado",
+          "titulo": "allow",
+          "sub": "en el iframe",
+          "detalhe": "<code>&lt;iframe allow=\"tools\"&gt;</code>: la página superior deja que el iframe de otro origen use la API. Sin eso, el <code>registerTool</code> del iframe falla con <code>NotAllowedError</code>."
+        },
+        {
+          "icone": "seta",
+          "titulo": "exposedTo",
+          "sub": "en el iframe",
+          "detalhe": "<code>registerTool(def, { exposedTo: ['https://topo.exemplo'] })</code>: el iframe acepta mostrar la tool a ese origen. Solo origen confiable (https o local); un <code>http://</code> público da <code>SecurityError</code>."
+        },
+        {
+          "icone": "lupa",
+          "titulo": "fromOrigins",
+          "sub": "en la página superior",
+          "forte": true,
+          "detalhe": "<code>getTools({ fromOrigins: ['https://iframe.exemplo'] })</code>: la página superior pide ver ese origen. Solo con los tres (allow, exposedTo y fromOrigins) la página superior ve la tool del iframe."
+        }
+      ],
+      "legenda": "Medido en Chromium 156.0.8078.4 con la flag de prueba de WebMCP (experimental al 19 de octubre de 2026). La sección de fronteras de origen de la spec (§6.3.4) todavía es solo una nota pendiente."
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Siete casos, dos orígenes locales",
+      "sub": "El topo corre en 127.0.0.1 en un puerto y el iframe en 127.0.0.1 en otro puerto. Misma máquina, puerto distinto: origen distinto.",
+      "blocos": [
+        {
+          "rot": "Terminal · exposición",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/exposicao.mjs; echo \"saída: $?\""
+        },
+        {
+          "rot": "Archivo · kit/exposicao/filho.html",
+          "icone": "arquivo",
+          "conteudo": "<!doctype html>\n<!-- filho.html — a página dentro do iframe (pode ser de outra origem). Tenta registrar uma ferramenta.\n     Parâmetro (só para o laboratório): ?exposto=<origem>  vira  registerTool(..., { exposedTo: [<origem>] }) -->\n<meta charset=\"utf-8\">\n<title>iframe</title>\n<script>\n  (async () => {\n    const q = new URLSearchParams(location.search);\n    const mc = document.modelContext;\n    let estado = 'sem WebMCP';\n    if (mc) {\n      try {\n        const opcoes = q.get('exposto') ? { exposedTo: [q.get('exposto')] } : {};\n        await mc.registerTool({ name: 'ferramenta_iframe', description: 'Ferramenta do iframe.',\n          inputSchema: { type: 'object', properties: {} }, execute: async () => ({ ok: true }) }, opcoes);\n        estado = 'registrou';\n      } catch (e) { estado = 'recusou: ' + e.name; }\n    }\n    parent.postMessage({ iframe: estado }, '*');\n  })();\n</script>"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nconfere 0 · iframe da MESMA origem, sem nada → vê: mesma origem é o padrão\nconfere A · iframe de outra origem, sem allow=\"tools\" → iframe recusado (NotAllowedError)\nconfere B · allow=\"tools\", sem exposedTo → topo não vê\nconfere C · allow + exposedTo:[topo], topo sem fromOrigins → topo não vê\nconfere D · allow + exposedTo:[topo] + fromOrigins:[iframe] → topo VÊ a ferramenta do iframe\nconfere E · topo com Permissions-Policy: tools=() → topo e iframe recusados\nconfere F · exposedTo com origem http:// pública → iframe recusado (SecurityError)\n7/7 casos conferem com a spec\nsaída: 0</pre><p>Solo en el caso D la página superior ve la tool del iframe, y el resultado trae su origen (<code>ferramenta_iframe@http://127.0.0.1:…</code>). El agente puede usar ese campo para no confundir de quién es la tool.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Reglas para tu sitio",
+      "passos": [
+        {
+          "titulo": "Basta con el valor por defecto",
+          "texto": [
+            "Si la tool es solo de tu página, no uses <code>exposedTo</code>. El mismo origen ya la ve, y ningún otro la necesita."
+          ]
+        },
+        {
+          "titulo": "Iframe de terceros",
+          "texto": [
+            "Widget de chat, anuncio, video: un iframe de otro origen sin <code>allow=\"tools\"</code>. Así no registra ninguna tool en tu documento."
+          ]
+        },
+        {
+          "titulo": "Página sin tools",
+          "texto": [
+            "Inicio de sesión, pago, privacidad: envía <code>Permissions-Policy: tools=()</code>. La spec (§6.4.1) dice que esto protege incluso de un script inyectado o de una dependencia comprometida, porque vale antes de que corra cualquier script."
+          ]
+        },
+        {
+          "titulo": "No es autorización",
+          "texto": [
+            "Ver la tool no significa poder hacerlo todo. El backend sigue comprobando quién es la persona y qué puede hacer, igual que con el botón."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "El encabezado en la práctica",
+      "sub": "El servidor del kit envía tools=() en la página de privacidad y nada en la página principal. Al lado, el mismo encabezado en tres servidores comunes.",
+      "blocos": [
+        {
+          "rot": "Terminal · encabezado",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/servir.mjs & P=$!\nuntil curl -s -o /dev/null http://127.0.0.1:8742/; do sleep 0.3; done\ncurl -sI http://127.0.0.1:8742/privacidade.html | grep -i '^permissions-policy'\ncurl -sI http://127.0.0.1:8742/ | grep -ci '^permissions-policy'\nkill $P; echo \"saída: $?\""
+        },
+        {
+          "rot": "Modelo · nginx",
+          "icone": "arquivo",
+          "conteudo": "location = /privacidade.html {\n    add_header Permissions-Policy \"tools=()\" always;\n}"
+        },
+        {
+          "rot": "Modelo · Express",
+          "icone": "arquivo",
+          "conteudo": "// antes do express.static\napp.use('/privacidade.html', (req, res, next) => {\n  res.set('Permissions-Policy', 'tools=()');\n  next();\n});"
+        },
+        {
+          "rot": "Modelo · _headers (Netlify, Cloudflare Pages)",
+          "icone": "arquivo",
+          "conteudo": "/privacidade.html\n  Permissions-Policy: tools=()"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>página em http://127.0.0.1:8742/\nPermissions-Policy: tools=()\n0\nsaída: 0</pre><p>La página de privacidad manda <code>tools=()</code>; la principal manda 0 encabezados Permissions-Policy (necesita la API).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Práctica",
+      "sub": "Medir y apagar.",
+      "exercicios": [
+        {
+          "id": "e10",
+          "titulo": "E10 · Siete casos",
+          "min": "5 min",
+          "texto": "Ejecuta el bloque <b>exposição</b>.",
+          "pronto": "<code>7/7 casos conferem com a spec</code> y <code>saída: 0</code>."
+        },
+        {
+          "id": "e11",
+          "titulo": "E11 · Encabezado del kit",
+          "min": "3 min",
+          "texto": "Ejecuta el bloque <b>cabeçalho</b>.",
+          "pronto": "<code>Permissions-Policy: tools=()</code> en la página de privacidad y <code>0</code> en la principal."
+        },
+        {
+          "id": "e12",
+          "titulo": "E12 · Tu sitio",
+          "min": "20 min",
+          "texto": "Elige las páginas de tu sitio que no registran tools (login, pago, privacidad), configura el encabezado en tu servidor y revisa cada una con <code>curl -sI [dirección de la página] | grep -i permissions-policy</code>.",
+          "pronto": "Cada página de la lista responde con <code>permissions-policy: tools=()</code>."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Prueba de la clase",
+      "perguntas": [
+        {
+          "p": "Un iframe de otro origen registró con exposedTo apuntando al documento superior, pero el documento superior no lo ve. ¿Qué falta?",
+          "opcoes": [
+            "Que el documento superior llame a getTools con fromOrigins apuntando al iframe",
+            "Que el iframe cambie exposedTo por http:// para ser más abierto",
+            "Un encabezado Permissions-Policy: tools=() en el documento superior",
+            "Registrar la tool dos veces, una en cada documento"
+          ],
+          "certa": 0,
+          "explica": "Medido (caso C × D): exposedTo es el consentimiento del iframe; fromOrigins es la solicitud del documento superior. Se necesitan los dos, más allow=\"tools\".",
+          "ref": "codigo",
+          "cert": true
+        },
+        {
+          "p": "¿Qué página debe mandar Permissions-Policy: tools=()?",
+          "opcoes": [
+            "La página principal, que registra las tools del sitio",
+            "Toda página que tiene un iframe de video del propio sitio",
+            "Solo las páginas servidas por http:// sin certificado",
+            "La página de pago, que no registra tools"
+          ],
+          "certa": 3,
+          "explica": "tools=() apaga la API en el documento y en sus iframes. Úsalo donde WebMCP no es la intención: protege incluso de un script inyectado (§6.4.1).",
+          "ref": "passos"
+        },
+        {
+          "p": "¿Qué pasa con exposedTo: ['http://exemplo.com']?",
+          "opcoes": [
+            "El documento superior pasa a ver la tool sin necesitar fromOrigins",
+            "registerTool rechaza con SecurityError: origem não confiável",
+            "La tool queda visible para todos los orígenes del mundo, sin excepción",
+            "No cambia nada: la lista se ignora fuera de Chrome Canary"
+          ],
+          "certa": 1,
+          "explica": "La spec exige un origen potencialmente confiable en la lista. Medido en Chromium 156: \"Only secure origins are allowed in the exposedTo list\".",
+          "ref": "diagrama"
+        },
+        {
+          "p": "La tool aparece para el documento superior. ¿Eso autoriza cualquier acción de ella?",
+          "opcoes": [
+            "Sí: si el navegador la expuso, el backend puede confiar en la llamada",
+            "Sí, siempre que la página use https en todas las rutas",
+            "No: el backend verifica a la persona y el permiso, igual que con el botón",
+            "No, porque el navegador apaga la tool después de una llamada"
+          ],
+          "certa": 2,
+          "explica": "La exposición decide quién ve. La autorización sigue en el servidor, igual que el clic de la persona.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "En tres frases",
+      "itens": [
+        {
+          "t": "Predeterminado",
+          "texto": "El mismo origen ve; otro origen no ve nada."
+        },
+        {
+          "t": "Iframe",
+          "texto": "Solo con allow=\"tools\", exposedTo y fromOrigins juntos."
+        },
+        {
+          "t": "Apagar",
+          "texto": "tools=() en las páginas que no necesitan la API."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir más allá",
+      "links": [
+        {
+          "t": "Spec WebMCP §4.2.3 exposedTo, §4.4 permissions policy, §6.4.1",
+          "href": "https://webmachinelearning.github.io/webmcp/"
+        },
+        {
+          "t": "Permissions Policy (W3C)",
+          "href": "https://w3c.github.io/webappsec-permissions-policy/"
+        },
+        {
+          "t": "Curso 3: el agente que consume WebMCP (lado del agente)",
+          "href": "https://inematds.github.io/formacao-webmcp-navegador-v72/es/"
+        }
+      ]
+    }
+  ]
+}

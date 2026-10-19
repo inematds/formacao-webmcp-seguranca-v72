@@ -1,0 +1,297 @@
+{
+  "slug": "servidor-seguro",
+  "num": 5,
+  "menu": "Server",
+  "titulo": "Secure MCP server: audience, minimum scope, handle tied to the user, and secret kept out of the repo",
+  "titulo_curto": "Secure MCP server",
+  "minutos": 20,
+  "lead": "You built the server's OAuth in course 1. Here is the other side: six attacks from the MCP security list (revision 2026-07-28) against the same server, written two ways. You see what the official SDK blocks on its own and what it only blocks if you configure it.",
+  "objetivo": "run 6 attacks against a weak MCP server and a secure one, and separate what the SDK blocks on its own from what depends on your configuration.",
+  "competencias": [
+    "conferir-audiencia-do-token",
+    "prender-handle-ao-usuario",
+    "aplicar-escopo-minimo-com-step-up",
+    "manter-segredo-fora-do-repositorio"
+  ],
+  "aprende": [
+    {
+      "icone": "portao",
+      "t": "Host and Origin: DNS rebinding against a local server"
+    },
+    {
+      "icone": "cadeado",
+      "t": "Token only in the header, with an expiry and for this server (audience)"
+    },
+    {
+      "icone": "escudo",
+      "t": "Minimum scope at the door, and the action's scope only when it is requested"
+    },
+    {
+      "icone": "chip",
+      "t": "No session in MCP 2026-07-28: the state handle is not a login"
+    }
+  ],
+  "hero_alt": "A small server in a rack with a physical padlock and a network cable plugged in, on a dark desk under neutral light.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "The five gates of a request",
+      "sub": "A request to the server passes through these gates, in this order. Click each one.",
+      "nos": [
+        {
+          "icone": "portao",
+          "titulo": "Host",
+          "sub": "and Origin",
+          "detalhe": "An outside page can talk to a server on 127.0.0.1 through DNS rebinding. The <code>localhostHostValidation</code> and <code>localhostOriginValidation</code> guards from <code>@modelcontextprotocol/node</code> refuse with 403 before anything else. You turn them on."
+        },
+        {
+          "icone": "cadeado",
+          "titulo": "Token",
+          "sub": "header",
+          "detalhe": "The SDK only reads <code>Authorization: Bearer</code>; a token in the URL does not get in (the spec forbids query strings). A token with no expiry or an expired one: 401. The SDK does this."
+        },
+        {
+          "icone": "alvo",
+          "titulo": "Audience",
+          "sub": "this server",
+          "forte": true,
+          "detalhe": "The spec says: \"MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server\". In the SDK this only happens if you pass <code>expectedResource</code>. You turn it on."
+        },
+        {
+          "icone": "escudo",
+          "titulo": "Scope",
+          "sub": "of the tool",
+          "detalhe": "Signing in asks only for <code>mentorias:ler</code>. The action asks for <code>mentorias:agendar</code> with <code>scopeChallenge: requireScopes(...)</code>, and the 403 carries the missing scope (step-up). You declare it, the SDK does it."
+        },
+        {
+          "icone": "usuario",
+          "titulo": "Handle",
+          "sub": "of the user",
+          "detalhe": "Revision 2026-07-28 has no session. The draft, the cart or the flow has a handle that comes back as an argument. Having the handle is not being logged in: check the owner through the token. You write this."
+        }
+      ],
+      "legenda": "Checked against the code of @modelcontextprotocol/server 2.3.1 (dist/) and the security_best_practices page of revision 2026-07-28."
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Six attacks, weak server",
+      "sub": "The same server with the common mistakes: it accepts a token in the URL, does not check the audience, does not ask for a scope on the action, and uses a sequential handle with no owner. Tokens are generated on the fly; nothing in the repository.",
+      "blocos": [
+        {
+          "rot": "Terminal · weak",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/atacar-mcp.mjs fraco; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Captured output (October 19, 2026)",
+            "html": "<pre>== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: fraco\nbloqueado 1 · Host de fora (DNS rebinding) → HTTP 401 (o token barrou; servidor sem token cairia)\nPASSOU    2 · token na query string → aceito\nPASSOU    3 · token de outro recurso → aceito\nPASSOU    4 · escopo de leitura confirma agendamento → agendado: m-101 para ana\nPASSOU    5 · handle de outro usuário → agendado: m-102 para ana\nbloqueado 6 · token vencido → invalid_token: Token has expired\npassaram: 4 de 6\nsaída: 1</pre><p>Attack 1 stopped at the token: a local server with no token would fall. The SDK always blocks 6. The four in the middle depend on you.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "The same six, secure server",
+      "sub": "The differences are marked with seguro in the server file.",
+      "blocos": [
+        {
+          "rot": "Terminal · secure",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/atacar-mcp.mjs seguro; echo \"saída: $?\""
+        },
+        {
+          "rot": "File · kit/mcp/servidor.mjs",
+          "icone": "arquivo",
+          "conteudo": "// servidor.mjs — MCP server over HTTP (revision 2026-07-28, official SDK v2 2.3.1) in two ways:\n//   seguro → as lesson 5 says;   fraco → common mistakes, so the attacks have something to hit.\n// Fictional mentoring service, data in memory. It calls no model or paid service.\n// The tokens are NOT stored here: the caller passes the token table (in the kit, generated on the fly with crypto.randomBytes).\nimport { createServer as criarHttp } from 'node:http';\nimport { randomBytes, timingSafeEqual } from 'node:crypto';\nimport { McpServer, createMcpHandler, requireBearerAuth, requireScopes, getOAuthProtectedResourceMetadataUrl, OAuthError, OAuthErrorCode } from '@modelcontextprotocol/server';\nimport { toNodeHandler, localhostHostValidation, localhostOriginValidation } from '@modelcontextprotocol/node';\nimport * as z from 'zod/v4';\n\nconst MENTORIAS = [\n  { id: 'm-101', titulo: 'Revisar as ferramentas da sua página', vagas: 2 },\n  { id: 'm-102', titulo: 'Servidor MCP com token', vagas: 1 }\n];\n\nexport function criarServidorMcp({ seguro }) {\n  const rascunhos = new Map();       // handle → { dono, mentoria }\n  let seq = 0;\n  // seguro: random, unpredictable handle; fraco: sequential (r1, r2…), easy to guess\n  const novoHandle = () => seguro ? randomBytes(16).toString('hex') : `r${++seq}`;\n  const usuario = ctx => ctx.http?.authInfo?.extra?.usuario;       // comes from the verified token, never from the client\n\n  return function criar() {\n    const server = new McpServer({ name: 'mentorias', version: '1.0.0' });\n\n    server.registerTool('ver_mentorias', {\n      description: 'Lista as mentorias com vaga. Só lê.',\n      inputSchema: z.object({}),\n      annotations: { readOnlyHint: true }\n    }, async () => ({ content: [{ type: 'text', text: MENTORIAS.map(m => `${m.id} · ${m.titulo} · ${m.vagas} vagas`).join('\\n') }] }));\n\n    server.registerTool('criar_rascunho', {\n      description: 'Começa um agendamento e devolve o código do rascunho, que vai nas próximas chamadas.',\n      inputSchema: z.object({ mentoria: z.string().regex(/^m-[0-9]{3}$/) }),\n      annotations: { readOnlyHint: false }\n    }, async ({ mentoria }, ctx) => {\n      const h = novoHandle();\n      rascunhos.set(h, { dono: usuario(ctx), mentoria });\n      return { content: [{ type: 'text', text: h }] };\n    });\n\n    server.registerTool('ver_rascunho', {\n      description: 'Mostra um rascunho de agendamento pelo código.',\n      inputSchema: z.object({ rascunho: z.string().max(64) }),\n      annotations: { readOnlyHint: true }\n    }, async ({ rascunho }, ctx) => {\n      const r = rascunhos.get(rascunho);\n      // MCP 2026-07-28 has no session: having the handle is NOT being authenticated. Check the owner.\n      if (!r || (seguro && r.dono !== usuario(ctx))) return { content: [{ type: 'text', text: 'rascunho não encontrado' }], isError: true };\n      return { content: [{ type: 'text', text: `rascunho de ${r.dono} para ${r.mentoria}` }] };\n    });\n\n    server.registerTool('confirmar_agendamento', {\n      description: 'Confirma o agendamento de um rascunho. Tem consequência: ocupa uma vaga.',\n      inputSchema: z.object({ rascunho: z.string().max(64) }),\n      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },\n      // seguro: this scope only appears when the action is requested (step-up); fraco: any token works\n      ...(seguro && { scopeChallenge: requireScopes('mentorias:agendar') })\n    }, async ({ rascunho }, ctx) => {\n      const r = rascunhos.get(rascunho);\n      if (!r || (seguro && r.dono !== usuario(ctx))) return { content: [{ type: 'text', text: 'rascunho não encontrado' }], isError: true };\n      rascunhos.delete(rascunho);\n      return { content: [{ type: 'text', text: `agendado: ${r.mentoria} para ${r.dono}` }] };\n    });\n\n    return server;\n  };\n}\n\n// Starts the HTTP server on 127.0.0.1. tokens = { <token>: { usuario, escopos, recurso?, expira? } }\nexport async function subir({ seguro, tokens, porta = 0 }) {\n  const http = criarHttp();\n  await new Promise(ok => http.listen(porta, '127.0.0.1', ok));\n  const URL_MCP = new URL(`http://127.0.0.1:${http.address().port}/mcp`);\n  const igual = (a, b) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));\n  const verifier = {\n    async verifyAccessToken(token) {\n      const chave = Object.keys(tokens).find(k => igual(k, token));\n      if (!chave) throw new OAuthError(OAuthErrorCode.InvalidToken, 'token desconhecido');\n      const t = tokens[chave];\n      return { token, clientId: t.usuario, scopes: t.escopos, expiresAt: t.expira ?? Math.floor(Date.now() / 1000) + 600,\n        resource: new URL(t.recurso ?? URL_MCP), extra: { usuario: t.usuario } };\n    }\n  };\n  const portao = requireBearerAuth({\n    verifier,\n    requiredScopes: ['mentorias:ler'],                                    // minimum scope to get in\n    resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(URL_MCP),\n    ...(seguro && { expectedResource: URL_MCP })                          // seguro: the token must be FOR this server\n  });\n  const mcp = createMcpHandler(criarServidorMcp({ seguro }));\n  const app = toNodeHandler({\n    async fetch(request) {\n      if (!seguro) {\n        // COMMON MISTAKE: accepting the token in the URL (it ends up in logs, history and Referer). The spec forbids it.\n        const t = new URL(request.url).searchParams.get('access_token');\n        if (t && !request.headers.get('authorization')) {\n          const h = new Headers(request.headers); h.set('authorization', `Bearer ${t}`);\n          request = new Request(request, { headers: h });\n        }\n      }\n      const auth = await portao(request);\n      if (auth instanceof Response) return auth;                            // 401 / 403 with WWW-Authenticate\n      return mcp.fetch(request, { authInfo: auth });\n    }\n  });\n  const hostOk = localhostHostValidation(), origemOk = localhostOriginValidation();\n  http.on('request', (req, res) => {\n    // seguro: refuses an outside Host/Origin (DNS rebinding) BEFORE anything else\n    if (seguro && (!hostOk(req, res) || !origemOk(req, res))) return;\n    void app(req, res);\n  });\n  return { url: URL_MCP, fechar: async () => { await mcp.close?.(); await new Promise(f => http.close(f)); } };\n}"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Captured output (October 19, 2026)",
+            "html": "<pre>== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: seguro\nbloqueado 1 · Host de fora (DNS rebinding) → HTTP 403 (Host recusado antes do token)\nbloqueado 2 · token na query string → invalid_token: Missing Authorization header\nbloqueado 3 · token de outro recurso → invalid_token: Token was not issued for this resource\nbloqueado 4 · escopo de leitura confirma agendamento → Insufficient scope: required \"mentorias:agendar\"\nbloqueado 5 · handle de outro usuário → rascunho não encontrado\nbloqueado 6 · token vencido → invalid_token: Token has expired\npassaram: 0 de 6\nsaída: 0</pre><p>Each refusal comes from a different place: Host (the Node adapter's guard), token and audience (the SDK, with <code>expectedResource</code>), scope (<code>requireScopes</code>), handle (your code).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Who owns what",
+      "passos": [
+        {
+          "titulo": "The SDK does",
+          "texto": [
+            "Reads the token from the header only, rejects a token that has no expiry or has expired, and responds 403 with the missing scope when the tool declares <code>requireScopes</code>."
+          ]
+        },
+        {
+          "titulo": "You turn on",
+          "texto": [
+            "<code>expectedResource</code> (audience), the Host and Origin guards, the server on 127.0.0.1, and the scope per tool. A local server that only your agent uses: stdio, which doesn't even open a port."
+          ]
+        },
+        {
+          "titulo": "You write",
+          "texto": [
+            "A random handle (<code>randomBytes</code>) tied to the token's user. The spec: \"MUST NOT treat possession of a state handle as authentication\"."
+          ]
+        },
+        {
+          "titulo": "Never",
+          "texto": [
+            "Pass the client's token on to another API (token passthrough, forbidden by the spec) or keep a secret in a file in the repository. The client also keeps credentials per issuer and doesn't reuse them with another authorization server (a change in the 2026-07-28 version)."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "Secrets outside the repository",
+      "sub": "A minimal checker (it does not replace gitleaks or GitHub's secret scanning). The second command plants a fake key in a rehearsal folder so you can see it get flagged.",
+      "blocos": [
+        {
+          "rot": "Terminal · segredos",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/segredos.mjs .; echo \"saída: $?\"\nE=${TMPDIR:-/tmp}/ensaio-seguranca/vazou; mkdir -p $E\nprintf \"export const API_KEY = '%s';\\n\" $(openssl rand -hex 16) > $E/config.mjs\nnode scripts/segredos.mjs $E; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Captured output (October 19, 2026)",
+            "html": "<pre>70 arquivos lidos · 0 segredos\nsaída: 0\nSEGREDO config.mjs:1: segredo atribuído no código (API_KEY = 'a…)\n1 arquivo lido · 1 segredo\nsaída: 1</pre><p>The kit passes clean; the rehearsal folder flags the key written in the code.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Practice",
+      "sub": "Attack, defense, and your repository.",
+      "exercicios": [
+        {
+          "id": "e13",
+          "titulo": "E13 · Weak server",
+          "min": "5 min",
+          "texto": "Run the <b>fraco</b> block and note which four attacks got through.",
+          "pronto": "<code>passaram: 4 de 6</code> and <code>saída: 1</code>."
+        },
+        {
+          "id": "e14",
+          "titulo": "E14 · Secure server",
+          "min": "10 min",
+          "texto": "Run the <b>seguro</b> block. Then, in <code>mcp/servidor.mjs</code>, remove <code>expectedResource</code> from secure mode and run it again. Undo it at the end.",
+          "pronto": "<code>passaram: 0 de 6</code>; without <code>expectedResource</code>, <code>PASSOU    3 · token de outro recurso</code>."
+        },
+        {
+          "id": "e15",
+          "titulo": "E15 · Your repository",
+          "min": "10 min",
+          "texto": "Run the checker on the repository of your server or site.",
+          "pronto": "<code>node scripts/segredos.mjs [your repository folder]</code> → <code>0 segredos</code> and <code>saída: 0</code>."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Lesson quiz",
+      "perguntas": [
+        {
+          "p": "A token issued for another service from the same provider reaches your server. In SDK 2.3.1, what makes it get rejected?",
+          "opcoes": [
+            "Nothing: the SDK always rejects a token from another service",
+            "The Host and Origin guard of the Node adapter, on by default",
+            "The expectedResource you pass to requireBearerAuth",
+            "The requireScopes declared on the read tool"
+          ],
+          "certa": 2,
+          "explica": "The SDK only compares the audience if you configure expectedResource (and the verifier returns resource). Attack 3 got through on the weak server because of that.",
+          "ref": "diagrama",
+          "cert": true
+        },
+        {
+          "p": "Bruno sends the code for Ana's draft and confirms the booking. Which MCP 2026-07-28 rule does this break?",
+          "opcoes": [
+            "Having the state handle is not authentication",
+            "The token must come in the header",
+            "The tool needs an outputSchema",
+            "The server must respond to server/discover"
+          ],
+          "certa": 0,
+          "explica": "With no session in the protocol, state lives in handles. The server checks the owner through the token, never through possession of the handle.",
+          "ref": "passos"
+        },
+        {
+          "p": "Which of these does the SDK do without you configuring anything?",
+          "opcoes": [
+            "Check that the token was issued for this server",
+            "Reject an outside Host to block DNS rebinding",
+            "Generate random handles for the drafts",
+            "Ignore a token sent in the URL query string"
+          ],
+          "certa": 3,
+          "explica": "verifyBearerToken only reads the Authorization header. You turn on audience and Host; you write the handle.",
+          "ref": "passos"
+        },
+        {
+          "p": "Why does the kit's server ask only for mentorias:ler to get in?",
+          "opcoes": [
+            "Because the SDK doesn't accept more than one scope in the same token",
+            "So the ordinary token can't book: the action asks for its own scope",
+            "Because a write scope only exists on the stdio transport",
+            "To let the client skip the consent screen"
+          ],
+          "certa": 1,
+          "explica": "Minimum scope at sign-in, and the action's scope only when it is requested. A leaked read token can't book anything.",
+          "ref": "diagrama"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "In three sentences",
+      "itens": [
+        {
+          "t": "SDK",
+          "texto": "Header, expiry and declared scope: it handles those."
+        },
+        {
+          "t": "You",
+          "texto": "Audience, Host/Origin, a handle with an owner, and no passthrough."
+        },
+        {
+          "t": "Secret",
+          "texto": "In the environment, never in the repository; check before you publish."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Going further",
+      "links": [
+        {
+          "t": "MCP 2026-07-28: Security Best Practices",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/security_best_practices"
+        },
+        {
+          "t": "MCP 2026-07-28: Authorization",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization"
+        },
+        {
+          "t": "MCP 2026-07-28: changelog",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/changelog"
+        },
+        {
+          "t": "Course 1: authorization with OAuth (the building side)",
+          "href": "https://inematds.github.io/formacao-webmcp-mcp-v72/en/aulas/autorizacao/"
+        }
+      ]
+    }
+  ]
+}

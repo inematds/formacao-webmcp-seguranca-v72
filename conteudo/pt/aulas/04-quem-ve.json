@@ -68,7 +68,7 @@
     {
       "tipo": "codigo",
       "titulo": "Sete casos, duas origens locais",
-      "sub": "O topo roda em http://127.0.0.1:[porta A] e o iframe em http://127.0.0.1:[porta B]. Mesma máquina, porta diferente: origem diferente.",
+      "sub": "O topo roda em 127.0.0.1 numa porta e o iframe em 127.0.0.1 noutra porta. Mesma máquina, porta diferente: origem diferente.",
       "blocos": [
         {
           "rot": "Terminal · exposição",

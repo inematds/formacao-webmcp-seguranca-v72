@@ -1,0 +1,383 @@
+{
+  "slug": "auditoria",
+  "num": 8,
+  "menu": "Audit",
+  "titulo": "Security audit of your site and server",
+  "titulo_curto": "Audit",
+  "minutos": 20,
+  "lead": "Six checks, one per lesson, in a single run with a dated report. You run the audit on the kit, plant a secret to see the break get caught, and leave with the review plan: the spec changes, the dependencies change, and the audit runs again.",
+  "objetivo": "run the full audit (page, fallback, exposure, catalog, server, secrets), see a break get caught, and leave with the dated plan.",
+  "competencias": [
+    "auditar-site-e-servidor",
+    "ler-relatorio-de-seguranca",
+    "planejar-revisao-periodica"
+  ],
+  "aprende": [
+    {
+      "icone": "check",
+      "t": "The six checks and which lesson each one comes from"
+    },
+    {
+      "icone": "arquivo",
+      "t": "The dated report the audit writes"
+    },
+    {
+      "icone": "x",
+      "t": "A break planted on purpose and caught"
+    },
+    {
+      "icone": "calendario",
+      "t": "Your plan with dates and the next review"
+    }
+  ],
+  "hero_alt": "Verification panel with six neutral indicators on a dark monitor, an industrial humanoid robot in the background in front of a browser.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "Six checks",
+      "sub": "One per course lesson. Click each one.",
+      "nos": [
+        {
+          "icone": "chat",
+          "titulo": "Page",
+          "sub": "lessons 2–3",
+          "detalhe": "checar.mjs: third-party text marked with untrustedContentHint; consequential action with annotation and confirmation that, when declined, changes nothing."
+        },
+        {
+          "icone": "seta",
+          "titulo": "Fallback",
+          "sub": "no API",
+          "detalhe": "The page opens in Chromium without WebMCP, shows the schedule and has no JavaScript errors. Most visitors are in this case."
+        },
+        {
+          "icone": "portao",
+          "titulo": "Exposure",
+          "sub": "lesson 4",
+          "detalhe": "Every .html page that is not the main one sends Permissions-Policy: tools=()."
+        },
+        {
+          "icone": "lista",
+          "titulo": "Catalog",
+          "sub": "lesson 7",
+          "detalhe": "ameacas.mjs with no findings in the page's definitions."
+        },
+        {
+          "icone": "cadeado",
+          "titulo": "Server",
+          "sub": "lesson 5",
+          "detalhe": "atacar-mcp.mjs seguro: none of the 6 attacks get through."
+        },
+        {
+          "icone": "escudo",
+          "titulo": "Secrets",
+          "sub": "lesson 5",
+          "forte": true,
+          "detalhe": "segredos.mjs on the kit folder: no key written to any file."
+        }
+      ],
+      "legenda": "Web Bot Auth (lesson 6) is not included: it is a policy decision, checked in the threat card and in politica-bots.md."
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "The kit audit",
+      "sub": "With the two holes fixed (lessons 2 and 3). Writes kit/relatorio-seguranca.md with the date.",
+      "blocos": [
+        {
+          "rot": "Terminal · audit",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/auditar.mjs; echo \"saída: $?\""
+        },
+        {
+          "rot": "File · kit/scripts/auditar.mjs",
+          "icone": "arquivo",
+          "conteudo": "// auditar.mjs — the security audit for the whole course in one run (lesson 8).\n// 6 checks, each from one lesson; writes relatorio-seguranca.md with date and result.\n//   1 page        checar.mjs: third-party text marked; consequential action asks for confirmation (lessons 2–3)\n//   2 fallback    the page works without WebMCP (the case for most visitors)\n//   3 exposure    every .html page that is not index sends Permissions-Policy with tools=() (lesson 4)\n//   4 catalog     ameacas.mjs with no findings (lesson 7)\n//   5 server      atacar-mcp.mjs seguro: 0 of 6 attacks get through (lesson 5)\n//   6 secrets     segredos.mjs on the kit folder: 0 secrets (lesson 5)\n// Usage: node scripts/auditar.mjs     (PAGINA=<folder> and CATALOGO=<file> for your copy)\n// Exit 0 = 6/6; 1 = at least one failed.\nimport { spawnSync } from 'node:child_process';\nimport { readdirSync, writeFileSync } from 'node:fs';\nimport { resolve } from 'node:path';\nimport { KIT, pastaPagina, servir, abrir } from '../lib/navegador.mjs';\n\nconst node = (...args) => spawnSync(process.execPath, args, { cwd: KIT, encoding: 'utf8', timeout: 240000 });\nconst ultima = r => (r.stdout || r.stderr || '').trim().split('\\n').at(-1);\nconst res = [];\nconst anotar = (n, nome, ok, det) => { res.push({ n, nome, ok, det }); console.log(`${ok ? 'ok   ' : 'FALHA'} ${n} ${nome}: ${det}`); };\n\nconst pasta = pastaPagina();\nconst s0 = await abrir('sem');\nconsole.log(`== ${s0.versao.replace(' · modo: sem', '')} · ${new Date().toISOString().slice(0, 10)}`);\n\nlet r = node('scripts/checar.mjs');\nanotar(1, 'página', r.status === 0, ultima(r));\n\nconst fb = await s0.page.evaluate(() => ({ modo: document.documentElement.dataset.webmcp, itens: document.querySelectorAll('li').length }));\nanotar(2, 'fallback', fb.modo === 'sem' && fb.itens > 0 && !s0.erros.length, `sem WebMCP: ${fb.itens} itens na tela, ${s0.erros.length} erros de JS`);\nawait s0.fechar();\n\nconst srv = await servir(pasta);\nconst paginas = readdirSync(pasta).filter(f => f.endsWith('.html') && f !== 'index.html');\nconst sem = [];\nfor (const p of paginas) {\n  const pp = (await fetch(srv.url + p)).headers.get('permissions-policy') || '';\n  if (!/\\btools=\\(\\)/.test(pp)) sem.push(p);\n}\nawait srv.fechar();\nanotar(3, 'exposição', sem.length === 0, sem.length ? `sem Permissions-Policy tools=(): ${sem.join(', ')}` : `${paginas.length} página(s) sem ferramenta com tools=()`);\n\nr = node('scripts/ameacas.mjs', process.env.CATALOGO || resolve(pasta, 'ferramentas.mjs'));\nanotar(4, 'catálogo', r.status === 0, ultima(r));\n\nr = node('scripts/atacar-mcp.mjs', 'seguro');\nanotar(5, 'servidor', r.status === 0, ultima(r));\n\nr = node('scripts/segredos.mjs', '.');\nanotar(6, 'segredos', r.status === 0, ultima(r));\n\nconst okN = res.filter(x => x.ok).length;\nconst hoje = new Date().toISOString().slice(0, 10);\nwriteFileSync(resolve(KIT, 'relatorio-seguranca.md'),\n  `# Relatório de segurança — ${hoje}\\n\\nSpec WebMCP: rascunho CG de 16/10/2026 · MCP 2026-07-28\\n\\n| # | verificação | resultado | detalhe |\\n|---|---|---|---|\\n` +\n  res.map(x => `| ${x.n} | ${x.nome} | ${x.ok ? 'ok' : 'FALHA'} | ${x.det.replace(/\\|/g, '/')} |`).join('\\n') +\n  `\\n\\nTotal: ${okN}/6. Rode de novo a cada mudança de ferramenta, de dependência ou da spec.\\n`);\nconsole.log(`AUDITORIA: ${okN}/6 ok · relatório: relatorio-seguranca.md`);\nprocess.exit(okN === 6 ? 0 : 1);"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Captured output (October 19, 2026)",
+            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · 2026-10-19\nok    1 página: RESULTADO: 0 falhas\nok    2 fallback: sem WebMCP: 4 itens na tela, 0 erros de JS\nok    3 exposição: 1 página(s) sem ferramenta com tools=()\nok    4 catálogo: 5 ferramentas · 0 achados\nok    5 servidor: passaram: 0 de 6\nok    6 segredos: 70 arquivos lidos · 0 segredos\nAUDITORIA: 6/6 ok · relatório: relatorio-seguranca.md\nsaída: 0</pre><p>The number of files read changes with what you add to the kit. What counts is the last line.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "A planted break",
+      "sub": "A forgotten file with a token inside the page folder. The block plants it, audits, and deletes it.",
+      "blocos": [
+        {
+          "rot": "Terminal · break",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nprintf \"export const TOKEN = '%s';\\n\" $(openssl rand -hex 16) > pagina/config-esquecida.mjs\nnode scripts/auditar.mjs | tail -2; echo \"saída: ${PIPESTATUS[0]}\"\nrm pagina/config-esquecida.mjs"
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Captured output (October 19, 2026)",
+            "html": "<pre>FALHA 6 segredos: 71 arquivos lidos · 1 segredo\nAUDITORIA: 5/6 ok · relatório: relatorio-seguranca.md\nsaída: 1</pre><p>Exit 1: you can use the audit as a gate before publishing (in CI or in a pre-push hook).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Audit your site",
+      "passos": [
+        {
+          "titulo": "Page",
+          "texto": [
+            "A local copy of your page that registers the tools and sets <code>document.documentElement.dataset.webmcp</code> at the end. <code>PAGINA=[folder]</code> changes the folder; <code>CANARIO</code> and <code>CONFIRMAR</code> change the canary and the selector of your dialog."
+          ]
+        },
+        {
+          "titulo": "Catalog",
+          "texto": [
+            "<code>CATALOGO=[file]</code> points to the module with the definitions, if it is not <code>ferramentas.mjs</code>."
+          ]
+        },
+        {
+          "titulo": "Server",
+          "texto": [
+            "<code>atacar-mcp.mjs</code> attacks the kit's server. For yours, copy the six attacks and replace <code>subir()</code> with the URL of your test server, using test tokens from your provider."
+          ]
+        },
+        {
+          "titulo": "When to run",
+          "texto": [
+            "On every new tool, every dependency update and whenever the spec changes. WebMCP is a draft: the origin trial runs through Chrome 156 and the API has already been renamed once."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "mapa",
+      "titulo": "The course map",
+      "sub": "Four deliverables, eight lessons. Click an exercise to see the \"done when\".",
+      "degraus": [
+        {
+          "aula": "sem-solucao",
+          "icone": "lupa",
+          "quando": "Lessons 1–2",
+          "titulo": "Text",
+          "sub": "injection + marking",
+          "saida": "Third-party text found and marked.",
+          "passo": "Accept that there is no filter and mark what comes from visitors."
+        },
+        {
+          "aula": "consequencia",
+          "icone": "portao",
+          "quando": "Lessons 3–4",
+          "titulo": "Brakes",
+          "sub": "confirmation + origin",
+          "saida": "An action asks for a person; only the right people see it.",
+          "passo": "Confirmation with target and effect, measured exposure, tools=() where it isn't needed."
+        },
+        {
+          "aula": "servidor-seguro",
+          "icone": "cadeado",
+          "quando": "Lessons 5–6",
+          "titulo": "Server",
+          "sub": "token + identity",
+          "saida": "6 attacks blocked and a bot policy.",
+          "passo": "Audience, scope, handle with an owner; signature verified."
+        },
+        {
+          "aula": "auditoria",
+          "icone": "check",
+          "quando": "Lessons 7–8",
+          "titulo": "Audit",
+          "sub": "threat card + test battery",
+          "saida": "Threat card 7/7 and audit 6/6.",
+          "passo": "Model the threats and run the battery after every change."
+        }
+      ],
+      "resultado": {
+        "titulo": "At the end of the course",
+        "texto": "Site and server audited, with a dated report and the date of the next review.",
+        "total": "24 exercises"
+      },
+      "legenda": "Each pair of lessons uses the fixed kit from the previous one."
+    },
+    {
+      "tipo": "gerador",
+      "titulo": "Generate your plan with dates",
+      "sub": "Pick a start date and how much time you have per week.",
+      "curso": "Security and Trust Between Site and Agent",
+      "horas_padrao": 4,
+      "degraus": [
+        {
+          "titulo": "Lesson 1 · Injection with no fix",
+          "aula": "sem-solucao"
+        },
+        {
+          "titulo": "Lesson 2 · Third-party text",
+          "aula": "dado-nao-e-instrucao"
+        },
+        {
+          "titulo": "Lesson 3 · Confirmation",
+          "aula": "consequencia"
+        },
+        {
+          "titulo": "Lesson 4 · Who sees the tool",
+          "aula": "quem-ve"
+        },
+        {
+          "titulo": "Lesson 5 · Secure MCP server",
+          "aula": "servidor-seguro"
+        },
+        {
+          "titulo": "Lesson 6 · Who gets in",
+          "aula": "quem-chega"
+        },
+        {
+          "titulo": "Lesson 7 · Threat modeling",
+          "aula": "ameacas"
+        },
+        {
+          "titulo": "Lesson 8 · Audit",
+          "aula": "auditoria"
+        }
+      ],
+      "txt": {
+        "titulo": "Plan — Security and Trust Between Site and Agent",
+        "inicio": "Start",
+        "ritmo": "Pace",
+        "termino": "Expected finish",
+        "ate": "by",
+        "pronto": "done when",
+        "semanas": "weeks",
+        "travou": "## What got stuck and the rule I created",
+        "h": "h per week",
+        "exs": "exercises"
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Practice",
+      "sub": "The audit on the kit and on your site.",
+      "exercicios": [
+        {
+          "id": "e22",
+          "titulo": "E22 · Kit audit",
+          "min": "10 min",
+          "texto": "With the holes from lessons 2 and 3 fixed, run the <b>auditar</b> block and open <code>relatorio-seguranca.md</code>.",
+          "pronto": "<code>AUDITORIA: 6/6 ok</code> and <code>saída: 0</code>."
+        },
+        {
+          "id": "e23",
+          "titulo": "E23 · Break test",
+          "min": "5 min",
+          "texto": "Run the <b>quebra</b> block.",
+          "pronto": "<code>FALHA 6 segredos</code>, <code>AUDITORIA: 5/6 ok</code> and <code>saída: 1</code>; after the <code>rm</code>, the audit goes back to 6/6."
+        },
+        {
+          "id": "e24",
+          "titulo": "E24 · Your site and the date",
+          "min": "30 min",
+          "texto": "Run the audit with <code>PAGINA</code> and <code>CATALOGO</code> from your site, generate the plan above, and mark the next review on your calendar.",
+          "pronto": "<code>PAGINA=[your folder] node scripts/auditar.mjs</code> writes a <code>relatorio-seguranca.md</code> with today's date, and the plan's <code>.ics</code> is in your calendar."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Lesson quiz",
+      "perguntas": [
+        {
+          "p": "The audit scored 5/6 with FALHA 6 segredos. What should you do before publishing?",
+          "opcoes": [
+            "Publish and run the audit again tomorrow, no rush",
+            "Remove the secret, swap the key, and rerun until 6/6",
+            "Turn off the secrets check in auditar.mjs",
+            "Move the file to a subfolder with a different name"
+          ],
+          "certa": 1,
+          "explica": "A key that has been in a file counts as leaked: replace it. Turning off the check or hiding the file only removes the warning.",
+          "ref": "codigo",
+          "cert": true
+        },
+        {
+          "p": "Why does check 2 open the page WITHOUT WebMCP?",
+          "opcoes": [
+            "Because the audit has no access to the Chromium test flag",
+            "To save run time in CI",
+            "Without the API, the site has to work the same",
+            "To test whether the polyfill was loaded"
+          ],
+          "certa": 2,
+          "explica": "WebMCP is experimental as of October 19, 2026. Every tool is feature detection + fallback: without the API, the buttons do the same job.",
+          "ref": "diagrama"
+        },
+        {
+          "p": "When does the audit need to run again?",
+          "opcoes": [
+            "Every tool, dependency, or spec change",
+            "Only when a user complains about a problem",
+            "Once a year, along with the site's domain renewal",
+            "Never, after the first 6/6"
+          ],
+          "certa": 0,
+          "explica": "Each of these changes can reopen a hole that was already closed. The origin trial runs through Chrome 156, and the API has already been renamed once.",
+          "ref": "passos"
+        },
+        {
+          "p": "Which lesson in the course does the audit NOT check automatically?",
+          "opcoes": [
+            "Confirmation of actions with consequences on the page",
+            "The Permissions-Policy header on the pages",
+            "Attacks on the MCP server",
+            "The signed bots policy (Web Bot Auth)"
+          ],
+          "certa": 3,
+          "explica": "Bot policy is your decision, recorded in politica-bots.md and in the threat card. The other five fronts become automatic checks.",
+          "ref": "diagrama"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "In three sentences",
+      "itens": [
+        {
+          "t": "Battery",
+          "texto": "Six checks, one run, dated report."
+        },
+        {
+          "t": "Gate",
+          "texto": "Exit 1 holds back publishing until you fix it."
+        },
+        {
+          "t": "Pace",
+          "texto": "Run it again every time you change a tool, a dependency, or the spec."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Going further",
+      "links": [
+        {
+          "t": "Next: course 5 · Expert — the agent-ready site in production",
+          "href": "https://inematds.github.io/formacao-webmcp-expert-v72/en/"
+        },
+        {
+          "t": "LOOP-R Track: security audit of the loop",
+          "href": "https://inematds.github.io/loop-r-eng-seguranca-v72/en/aulas/auditoria/"
+        },
+        {
+          "t": "LOOP-R Track: evals and in-depth verification",
+          "href": "https://inematds.github.io/loop-r-eng-verificacao-v72/en/"
+        },
+        {
+          "t": "MCP 2026-07-28: Security Best Practices",
+          "href": "https://modelcontextprotocol.io/specification/2026-07-28/basic/security_best_practices"
+        }
+      ]
+    }
+  ]
+}

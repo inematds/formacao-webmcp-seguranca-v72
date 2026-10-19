@@ -1,0 +1,270 @@
+{
+  "slug": "quem-chega",
+  "num": 6,
+  "menu": "Identidad",
+  "titulo": "Identificar quién llega: Web Bot Auth y signed agents (borrador del IETF)",
+  "titulo_curto": "Quién llega",
+  "minutos": 18,
+  "lead": "User-Agent lo puede escribir cualquiera. Web Bot Auth es la propuesta del IETF para que el bot firme cada solicitud con una clave publicada en una URL suya. Todavía es un borrador (-00, septiembre de 2026). En esta lección compruebas una firma contra el vector del draft y ves en un servidor local qué prueba y qué no prueba.",
+  "objetivo": "comprobar una firma Web Bot Auth con el vector del draft y verificar solicitudes firmadas en un servidor local, sabiendo lo que la firma no prueba.",
+  "competencias": [
+    "explicar-web-bot-auth",
+    "verificar-assinatura-http",
+    "separar-identidade-de-autorizacao"
+  ],
+  "aprende": [
+    {
+      "icone": "chip",
+      "t": "HTTP Message Signatures (RFC 9421) y lo que añade el draft"
+    },
+    {
+      "icone": "check",
+      "t": "El vector de prueba del draft, rehecho byte a byte"
+    },
+    {
+      "icone": "alvo",
+      "t": "Componentes cubiertos, vigencia y replay"
+    },
+    {
+      "icone": "usuario",
+      "t": "Identidad no es autorización: la política sigue siendo tuya"
+    }
+  ],
+  "hero_alt": "Credencial metálica sin inscripción sobre un teclado oscuro, junto a un cable de red, luz neutra.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "Del agente que firma a la política del sitio",
+      "sub": "draft-ietf-webbotauth-httpsig-protocol-00 (1 de septiembre de 2026). Haz clic en cada etapa.",
+      "nos": [
+        {
+          "icone": "robo",
+          "titulo": "Agente",
+          "sub": "tiene la clave",
+          "detalhe": "El operador del bot publica las claves (JWKS) en un directorio en <code>/.well-known/http-message-signatures-directory</code> y guarda la privada."
+        },
+        {
+          "icone": "caneta",
+          "titulo": "Firma",
+          "sub": "por solicitud",
+          "detalhe": "Cubre al menos <code>@authority</code> (o <code>@target-uri</code>), con <code>created</code>, <code>expires</code> (hasta 24 h, recomendado), <code>keyid</code> (thumbprint de la clave) y <code>tag=\"web-bot-auth\"</code>. Cubrir también <code>@method</code> y <code>@path</code> restringe el uso."
+        },
+        {
+          "icone": "seta",
+          "titulo": "Signature-Agent",
+          "sub": "su URL",
+          "detalhe": "Encabezado en forma de diccionario con la URL https del directorio. Hasta que el origen busque esa URL y encuentre la clave que coincide, es solo una afirmación."
+        },
+        {
+          "icone": "lupa",
+          "titulo": "Origen",
+          "sub": "comprueba",
+          "forte": true,
+          "detalhe": "Rehace la base de la firma, encuentra la clave por el <code>keyid</code> en el directorio y verifica. Válida = quien tiene una clave publicada en esa URL firmó esta solicitud."
+        },
+        {
+          "icone": "portao",
+          "titulo": "Política",
+          "sub": "del sitio",
+          "detalhe": "Permitir, limitar, bloquear: decisión tuya. El draft dice que la firma no dice nada sobre quién opera el agente, si es benigno o si la solicitud está autorizada (§4.1, §4.6)."
+        }
+      ],
+      "legenda": "Borrador de grupo del IETF (Cloudflare y Google), expira el 5 de marzo de 2027. No es un RFC."
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "El vector del draft, rehecho",
+      "sub": "Apéndice E.2.1: Ed25519 con la clave de prueba pública del RFC 9421 (B.1.4). Solo node:crypto, ningún paquete.",
+      "blocos": [
+        {
+          "rot": "Terminal · vector",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/wba.mjs vetor; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>== node v24.13.0 · draft-ietf-webbotauth-httpsig-protocol-00 (01/09/2026)\nkeyid calculado: poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U · confere\nassinatura: RdNFx5Bj6au3YgAMQL/RzmUl… · confere\nvetor E.2.1: confere\nsaída: 0</pre><p>Ed25519 es determinista: misma clave y misma base dan la misma firma. Si tu implementación rehace el vector, está armando la base de firma como lo hace el draft. La clave de prueba nunca va a producción (anexo C.12 del draft).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "El agente firma, el origen verifica: siete casos",
+      "sub": "Clave nueva en cada ejecución. El origen ya tiene el directorio del agente, como lo permite el draft (§4.4); nada sale de tu máquina.",
+      "blocos": [
+        {
+          "rot": "Terminal · demo",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/wba.mjs demo; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Salida capturada (19 de octubre de 2026)",
+            "html": "<pre>== node v24.13.0 · draft-ietf-webbotauth-httpsig-protocol-00 (01/09/2026) · origem http://127.0.0.1:36913\n1 · sem assinatura → anônimo: sem assinatura (a política do site decide)\n2 · assinado, válido → identificado: https://agente.exemplo (chave gw6T0rIc…)\n3 · mesma assinatura em outro caminho → recusado: assinatura não confere\n4 · assinatura vencida → recusado: assinatura vencida\n5 · chave que a origem não conhece → recusado: chave desconhecida para https://agente.exemplo\n6 · replay dentro da validade → identificado: https://agente.exemplo (chave gw6T0rIc…)\n7 · assinatura mínima (só @authority) usada em /admin → identificado: https://agente.exemplo (chave gw6T0rIc…)\n7/7 casos como esperado · replay dentro da validade: aceito\nsaída: 0</pre><p>Los casos 6 y 7 son la advertencia del draft (§5.2): dentro de la validez, quien vio el pedido puede repetirlo; y una firma que cubre solo <code>@authority</code> vale para cualquier ruta del sitio. Por eso: validez corta y <code>@method</code> + <code>@path</code> cubiertos, y el origen puede exigir esos componentes.</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Dónde aparece ya",
+      "passos": [
+        {
+          "titulo": "Cloudflare",
+          "texto": [
+            "Desde el 1 de julio de 2026, los agentes firmados con Web Bot Auth cuentan como Verified, con un campo nuevo: Direct (un solo operador) o Intermediary (servicio que muchos usuarios comandan)."
+          ]
+        },
+        {
+          "titulo": "Intermediario",
+          "texto": [
+            "En Intermediary, puedes confiar en el operador y no en cada usuario que dirige el agente. Cloudflare lo llama confianza transitiva."
+          ]
+        },
+        {
+          "titulo": "Tu sitio",
+          "texto": [
+            "Anónimo sigue existiendo: firmar es decisión del bot. Escribe tu política para los tres casos: anónimo, firmado y conocido, firmado y desconocido."
+          ]
+        },
+        {
+          "titulo": "Junto con robots",
+          "texto": [
+            "robots.txt dice para qué finalidad puede venir cada bot; la firma dice quién es. El robots a fondo es de la Formación inemaSEO."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Práctica",
+      "sub": "Verificar y decidir.",
+      "exercicios": [
+        {
+          "id": "e16",
+          "titulo": "E16 · Vector del draft",
+          "min": "3 min",
+          "texto": "Ejecuta el bloque <b>vetor</b>.",
+          "pronto": "<code>vetor E.2.1: confere</code> y <code>saída: 0</code>."
+        },
+        {
+          "id": "e17",
+          "titulo": "E17 · Siete casos",
+          "min": "10 min",
+          "texto": "Ejecuta el bloque <b>demo</b> y explica, en una frase cada uno, por qué se aceptaron los casos 6 y 7.",
+          "pronto": "<code>7/7 casos como esperado · replay dentro da validade: aceito</code>."
+        },
+        {
+          "id": "e18",
+          "titulo": "E18 · Política de tu sitio",
+          "min": "15 min",
+          "texto": "Crea <code>politica-bots.md</code> con tres líneas, una por caso, que empiecen por <code>anônimo:</code>, <code>assinado e conhecido:</code> y <code>assinado e desconhecido:</code>, cada una con lo que hace el sitio (permitir, limitar, bloquear, en qué páginas).",
+          "pronto": "<code>grep -c -E \"^(anônimo|assinado e conhecido|assinado e desconhecido):\" politica-bots.md</code> → <code>3</code>."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Prueba de la clase",
+      "perguntas": [
+        {
+          "p": "¿Qué prueba una firma Web Bot Auth válida?",
+          "opcoes": [
+            "Que el bot es benigno y puede acceder a cualquier página del sitio sin límite",
+            "Que un usuario humano autorizó ese pedido específico",
+            "Que quien tiene una clave publicada en esa URL firmó el pedido",
+            "Que nadie más puede repetir el pedido"
+          ],
+          "certa": 2,
+          "explica": "El draft (§4.1) es explícito: dice quién tiene la clave, no si es benigno ni si está autorizado. Y dentro de la validez puede haber replay.",
+          "ref": "diagrama",
+          "cert": true
+        },
+        {
+          "p": "¿Por qué se aceptó la firma mínima (solo @authority) en /admin en el caso 7?",
+          "opcoes": [
+            "No cubre la ruta: vale en cualquier ruta",
+            "Porque la clave de prueba del RFC acepta cualquier ruta",
+            "Porque /admin no tenía Permissions-Policy en la respuesta",
+            "Porque el servidor ignoró el campo expires de la firma"
+          ],
+          "certa": 0,
+          "explica": "§5.2: al cubrir solo @authority, la firma vale para cualquier método, ruta y cuerpo en ese origen hasta que venza. Cubre @method y @path.",
+          "ref": "codigo"
+        },
+        {
+          "p": "¿Cuál es el estado de Web Bot Auth el 19 de octubre de 2026?",
+          "opcoes": [
+            "RFC publicada, obligatoria para todos los bots de IA en la web",
+            "Especificación del W3C, ya implementada en los navegadores",
+            "Propuesta solo de Cloudflare, sin documento público",
+            "Internet-Draft de un grupo del IETF (-00), aún no es RFC"
+          ],
+          "certa": 3,
+          "explica": "draft-ietf-webbotauth-httpsig-protocol-00, publicado el 1 de septiembre de 2026, vence el 5 de marzo de 2027. Base estable: RFC 9421 (HTTP Message Signatures).",
+          "ref": "diagrama"
+        },
+        {
+          "p": "En Cloudflare, ¿qué cambia cuando el agente es Intermediary?",
+          "opcoes": [
+            "No puede firmar las solicitudes con Web Bot Auth",
+            "Muchos usuarios lo controlan; confiar en el operador no basta",
+            "Recibe más acceso que un bot Direct en todas las páginas",
+            "Necesita un token OAuth de tu servidor MCP"
+          ],
+          "certa": 1,
+          "explica": "Direct: un operador. Intermediary: un servicio que muchos usuarios controlan (confianza transitiva). La política del sitio puede tratar a los dos de forma distinta.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "En tres frases",
+      "itens": [
+        {
+          "t": "Firma",
+          "texto": "Prueba quién tiene la clave de la URL, no la intención ni el permiso."
+        },
+        {
+          "t": "Cobertura",
+          "texto": "Validez corta, @method y @path cubiertos; el replay existe."
+        },
+        {
+          "t": "Política",
+          "texto": "Anónimo, conocido y desconocido: tres reglas tuyas."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir más allá",
+      "links": [
+        {
+          "t": "draft-ietf-webbotauth-httpsig-protocol (IETF)",
+          "href": "https://datatracker.ietf.org/doc/html/draft-ietf-webbotauth-httpsig-protocol"
+        },
+        {
+          "t": "RFC 9421: HTTP Message Signatures",
+          "href": "https://www.rfc-editor.org/rfc/rfc9421"
+        },
+        {
+          "t": "Cloudflare: Verified bots y signed agents",
+          "href": "https://developers.cloudflare.com/bots/concepts/bot/signed-agents/"
+        },
+        {
+          "t": "Curso 0: quién está llegando (el concepto)",
+          "href": "https://inematds.github.io/formacao-webmcp-base-v72/es/aulas/quem-chega/"
+        }
+      ]
+    }
+  ]
+}
