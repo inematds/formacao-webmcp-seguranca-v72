@@ -1,0 +1,244 @@
+{
+  "slug": "consequencia",
+  "num": 3,
+  "menu": "Confirmação",
+  "titulo": "Ação com consequência pede humano: confirmação e consequentialHint",
+  "titulo_curto": "Confirmação",
+  "minutos": 18,
+  "lead": "Reservar, cancelar, pagar, apagar. O agente pode escolher a ferramenta errada, entender mal a descrição ou obedecer a um texto plantado. A spec do WebMCP responde com consequentialHint, para o cliente exigir confirmação. Nesta aula você põe a anotação e a confirmação do próprio site, e prova que recusar não muda nada.",
+  "objetivo": "pôr consequentialHint e uma confirmação com alvo e efeito em toda ferramenta que muda algo, e provar que recusar não muda nada.",
+  "competencias": [
+    "anotar-consequential",
+    "desenhar-confirmacao-com-alvo-e-efeito",
+    "testar-recusa-sem-efeito"
+  ],
+  "aprende": [
+    {
+      "icone": "alvo",
+      "t": "Intenção mal descrita: o caso finalizeCart da spec"
+    },
+    {
+      "icone": "portao",
+      "t": "consequentialHint (sinal para o cliente) e confirmação do site (a sua trava)"
+    },
+    {
+      "icone": "check",
+      "t": "O teste que recusa e confere que nada mudou"
+    },
+    {
+      "icone": "escudo",
+      "t": "O limite: um agente que opera a tela também clica no botão"
+    }
+  ],
+  "hero_alt": "Diálogo de confirmação em tela escura com dois botões neutros, a mão de uma pessoa perto do mouse, luz neutra.",
+  "secoes": [
+    {
+      "tipo": "diagrama",
+      "titulo": "Do pedido ao efeito, com uma pessoa no meio",
+      "sub": "Clique em cada etapa.",
+      "nos": [
+        {
+          "icone": "robo",
+          "titulo": "Pedido",
+          "sub": "do agente",
+          "detalhe": "O agente chama <code>cancelar_agendamento</code> com <code>{\"codigo\":\"AG-1\"}</code>. Pode ser o que o usuário quis, ou um texto plantado numa avaliação."
+        },
+        {
+          "icone": "megafone",
+          "titulo": "Anotação",
+          "sub": "consequentialHint",
+          "detalhe": "<code>consequentialHint: true</code> avisa o cliente que a ação é significativa, real ou irreversível. A spec (§6.4.5) diz que o cliente pode então exigir confirmação. Pode, não deve."
+        },
+        {
+          "icone": "portao",
+          "titulo": "Confirmação",
+          "sub": "alvo e efeito",
+          "forte": true,
+          "detalhe": "A sua página mostra a pergunta com o alvo e o efeito por extenso: \"Cancelar o agendamento AG-1 (m-102, Rita)? A vaga volta para a agenda.\" E espera."
+        },
+        {
+          "icone": "usuario",
+          "titulo": "Pessoa",
+          "sub": "decide",
+          "detalhe": "Confirmar executa. Recusar devolve <code>{cancelado:false}</code> e não muda nada. Cancelar a execução (o <code>signal</code>) vale como recusa."
+        }
+      ],
+      "legenda": "A anotação é para o cliente; a confirmação é sua. Uma não substitui a outra."
+    },
+    {
+      "tipo": "passos",
+      "titulo": "Confirmação que protege",
+      "passos": [
+        {
+          "titulo": "Alvo e efeito",
+          "texto": [
+            "A pergunta diz o que, de quem e o que acontece depois. \"Tem certeza?\" não serve: a pessoa não sabe o que está aprovando."
+          ]
+        },
+        {
+          "titulo": "Presa à chamada",
+          "texto": [
+            "Uma pergunta por chamada, com os argumentos daquela chamada. Se o alvo mudar, é outra pergunta. Nunca um \"sim\" que vale para as próximas."
+          ]
+        },
+        {
+          "titulo": "Nome que diz o efeito",
+          "texto": [
+            "A spec mostra <code>finalizeCart</code>: o agente achou que só fechava o carrinho para ver, e a ferramenta comprou (§6.3.2.3). Nome e descrição dizem o efeito: <code>comprar_carrinho</code>, \"cobra o cartão salvo\"."
+          ]
+        },
+        {
+          "titulo": "O limite",
+          "texto": [
+            "O diálogo está na página, e um agente que opera a tela também consegue clicar em Confirmar. O próprio <code>checar.mjs</code> clica, como um agente faria. Para ação de alto valor, peça algo que o agente não tem: a senha de novo ou um código enviado à pessoa."
+          ]
+        }
+      ]
+    },
+    {
+      "tipo": "codigo",
+      "titulo": "O segundo furo: cancelar sem perguntar",
+      "sub": "Edite cancelar_agendamento em kit/pagina/ferramentas.mjs como no trecho e rode o checador. A versão pronta está em kit/solucao/aula3/.",
+      "blocos": [
+        {
+          "rot": "Trecho · kit/solucao/aula3/ferramentas.mjs",
+          "icone": "arquivo",
+          "conteudo": "      annotations: { consequentialHint: true },              // aula 3: avisa que a ação tem consequência\n      execute: util(async ({ codigo }, { signal }) => {\n        const ag = agenda.agendamentos().find(a => a.codigo === codigo);\n        if (!ag) throw new Error(`agendamento não encontrado: ${codigo}`);\n        // a pergunta diz o alvo e o efeito por extenso; cancelar a execução (signal) vale como \"não\"\n        const ok = await ui.pedirConfirmacao(`Cancelar o agendamento ${ag.codigo} (${ag.id}, ${ag.nome})? A vaga volta para a agenda.`, signal);\n        if (!ok) return { cancelado: false, motivo: 'a pessoa recusou na tela' };\n        agenda.cancelar(codigo);\n        ui.atualizar();\n        return { cancelado: true, agendamento: ag };\n      })"
+        },
+        {
+          "rot": "Terminal · checar depois",
+          "icone": "terminal",
+          "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/checar.mjs; echo \"saída: $?\""
+        }
+      ],
+      "saida": {
+        "selo": "real",
+        "abas": [
+          {
+            "rot": "Saída capturada (19/10/2026)",
+            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nok    buscar_mentorias: só leitura, sem texto de terceiro\nok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint\nok    meus_agendamentos: só leitura, sem texto de terceiro\nok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada\nok    cancelar_agendamento: consequentialHint + confirmação; recusar não mudou nada\nRESULTADO: 0 falhas\nsaída: 0</pre><p>Antes do conserto, a mesma linha dizia <code>FALHA cancelar_agendamento: agiu sem pedir confirmação</code> (saída da aula 2).</p>"
+          }
+        ]
+      }
+    },
+    {
+      "tipo": "pratica",
+      "titulo": "Prática",
+      "sub": "A trava no kit e na sua página.",
+      "exercicios": [
+        {
+          "id": "e7",
+          "titulo": "E7 · Conserte o cancelamento",
+          "min": "15 min",
+          "texto": "Ponha <code>consequentialHint</code> e a confirmação em <code>cancelar_agendamento</code> e rode o bloco <b>checar depois</b>.",
+          "pronto": "<code>RESULTADO: 0 falhas</code> e <code>saída: 0</code>."
+        },
+        {
+          "id": "e8",
+          "titulo": "E8 · Quebre de propósito",
+          "min": "5 min",
+          "texto": "Em <code>agendar_mentoria</code>, troque <code>const ok = await ui.pedirConfirmacao(…)</code> por <code>const ok = true</code> e rode o checador. Depois desfaça.",
+          "pronto": "<code>FALHA agendar_mentoria: agiu sem pedir confirmação</code> e <code>saída: 1</code>; desfeito, <code>RESULTADO: 0 falhas</code>."
+        },
+        {
+          "id": "e9",
+          "titulo": "E9 · Inventário do seu site",
+          "min": "20 min",
+          "texto": "Liste as ferramentas do seu site que mudam alguma coisa. Cada uma recebe <code>consequentialHint: true</code> e uma pergunta com alvo e efeito.",
+          "pronto": "<code>grep -c \"consequentialHint: true\" [seu arquivo de ferramentas]</code> → o número de ferramentas da sua lista."
+        }
+      ]
+    },
+    {
+      "tipo": "quiz",
+      "titulo": "Teste da aula",
+      "perguntas": [
+        {
+          "p": "O que a spec diz que o cliente pode fazer ao ver consequentialHint?",
+          "opcoes": [
+            "Exigir confirmação do usuário antes de executar",
+            "Executar sem perguntar, porque o site já confirma",
+            "Recusar a ferramenta para todos os usuários do site",
+            "Trocar a ferramenta pela versão só de leitura"
+          ],
+          "certa": 0,
+          "explica": "§6.4.5: o sinal permite ao cliente exigir confirmação seletivamente. É uma possibilidade do cliente, por isso o site tem a própria confirmação.",
+          "ref": "diagrama",
+          "cert": true
+        },
+        {
+          "p": "Qual pergunta de confirmação protege de verdade?",
+          "opcoes": [
+            "\"Tem certeza que deseja continuar com esta ação agora mesmo?\"",
+            "\"Confirmar?\" com o botão já selecionado para agilizar",
+            "\"Cancelar o agendamento AG-1 (m-102, Rita)? A vaga volta para a agenda.\"",
+            "\"Deseja permitir todas as ações deste agente, nesta e nas próximas visitas ao site?\""
+          ],
+          "certa": 2,
+          "explica": "Alvo e efeito por extenso, uma pergunta por chamada. As outras pedem um sim sem dizer para quê, ou um sim que vale para muitas ações.",
+          "ref": "passos"
+        },
+        {
+          "p": "Por que o curso diz que a confirmação na página tem limite?",
+          "opcoes": [
+            "Porque o polyfill não mostra diálogos na página",
+            "Porque um agente que opera a tela também clica em Confirmar",
+            "Porque a spec proíbe diálogos dentro do execute da ferramenta",
+            "Porque o signal fecha o diálogo antes de a pessoa ler"
+          ],
+          "certa": 1,
+          "explica": "O checar.mjs clica no botão, como um agente faria. Para ação de alto valor, peça algo que o agente não tem.",
+          "ref": "passos"
+        },
+        {
+          "p": "No caso finalizeCart da spec, o que deu errado?",
+          "opcoes": [
+            "O agente não tinha permissão de usar a ferramenta",
+            "A ferramenta pediu dados pessoais demais ao agente durante a compra",
+            "O iframe de outra origem chamou a ferramenta sozinho",
+            "O nome e a descrição escondiam que a ferramenta comprava"
+          ],
+          "certa": 3,
+          "explica": "Intenção mal descrita (§6.3.2): o agente leu \"finaliza o carrinho\" como \"mostra o carrinho\". Nome e descrição têm de dizer o efeito.",
+          "ref": "passos"
+        }
+      ]
+    },
+    {
+      "tipo": "resumo",
+      "titulo": "Em três frases",
+      "itens": [
+        {
+          "t": "Anotação",
+          "texto": "consequentialHint em toda ferramenta que muda algo."
+        },
+        {
+          "t": "Confirmação",
+          "texto": "Do site, com alvo e efeito, uma por chamada; recusar não muda nada."
+        },
+        {
+          "t": "Limite",
+          "texto": "Botão na tela o agente também clica; alto valor pede o que só a pessoa tem."
+        }
+      ]
+    },
+    {
+      "tipo": "links",
+      "titulo": "Para ir além",
+      "links": [
+        {
+          "t": "Spec WebMCP §6.3.2 Misrepresentation of Intent e §6.4.5 Consequential Annotation",
+          "href": "https://webmachinelearning.github.io/webmcp/"
+        },
+        {
+          "t": "Curso 1: confirmação no meio da chamada no MCP (MRTR)",
+          "href": "https://inematds.github.io/formacao-webmcp-mcp-v72/aulas/confirmacao-mrtr/"
+        },
+        {
+          "t": "Formação LOOP-R: irreversível pede humano",
+          "href": "https://inematds.github.io/loop-r-eng-seguranca-v72/aulas/irreversivel/"
+        }
+      ]
+    }
+  ]
+}
