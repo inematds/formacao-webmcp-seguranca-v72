@@ -1,0 +1,18 @@
+{
+  "name": "kit-seguranca-site-agente",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Kit do curso Segurança e confiança entre site e agente (Formação WebMCP, INEMA.CLUB). Página com ferramentas WebMCP, servidor MCP local e testes de ataque. Nenhum modelo, nenhuma chave, nenhum serviço pago. Versões fixadas em 19/10/2026.",
+  "scripts": {
+    "test": "node scripts/auditar.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "playwright": "1.64.0",
+    "zod": "4.6.7"
+  },
+  "engines": { "node": ">=20" }
+}

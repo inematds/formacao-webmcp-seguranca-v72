@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- topo.html — a página principal. Registra uma ferramenta, embute um iframe e lista o que enxerga.
+     Parâmetros (só para o laboratório): ?filho=<url do iframe>&allow=tools&from=<origem do iframe> -->
+<meta charset="utf-8">
+<title>topo</title>
+<script>
+  window.R = {};
+  const q = new URLSearchParams(location.search);
+  (async () => {
+    const mc = document.modelContext;            // rascunho de 16/10/2026
+    if (!mc) { R.topo = 'sem WebMCP'; R.fim = true; return; }
+    try {
+      await mc.registerTool({ name: 'ferramenta_topo', description: 'Ferramenta da página principal.',
+        inputSchema: { type: 'object', properties: {} }, execute: async () => ({ ok: true }) });
+      R.topo = 'registrou';
+    } catch (e) { R.topo = 'recusou: ' + e.name; }
+  })();
+  // quando o iframe avisa que tentou registrar, o topo lista o que enxerga
+  addEventListener('message', async e => {
+    R.iframe = e.data.iframe;
+    try {
+      const opcoes = q.get('from') ? { fromOrigins: [q.get('from')] } : undefined;
+      const lista = await document.modelContext.getTools(opcoes);
+      R.ve = lista.map(t => `${t.name}@${t.origin}`);
+    } catch (err) { R.ve = 'recusou: ' + err.name; }
+    R.fim = true;
+  });
+  addEventListener('DOMContentLoaded', () => {
+    const f = document.createElement('iframe');
+    if (q.get('allow')) f.allow = q.get('allow');
+    f.src = q.get('filho');
+    document.body.append(f);
+  });
+</script>
+<body></body>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda de mentorias — kit de segurança</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; background: #0c0c10; color: #eee; }
+  button { font: inherit; padding: .4rem .8rem; margin: .2rem; }
+  li { margin: .3rem 0; }
+  #confirmar { border: 2px solid #FACC15; padding: 1rem; margin: 1rem 0; }
+  #aviso { color: #aaa; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>Agenda de mentorias</h1>
+<p id="aviso"></p>
+<h2>Mentorias</h2>
+<ul id="lista"></ul>
+<h2>Meus agendamentos</h2>
+<ul id="agendamentos"></ul>
+<!-- Diálogo de confirmação: alvo e efeito por extenso. O checar.mjs procura [data-confirmar]. -->
+<div id="confirmar" data-confirmar hidden>
+  <p id="pergunta"></p>
+  <button data-acao="confirmar">Confirmar</button>
+  <button data-acao="recusar">Recusar</button>
+</div>
+<script type="module" src="app.mjs"></script>
+</body>
+</html>

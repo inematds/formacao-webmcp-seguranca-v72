@@ -1,0 +1,5 @@
+70 arquivos lidos · 0 segredos
+saída: 0
+SEGREDO config.mjs:1: segredo atribuído no código (API_KEY = 'a…)
+1 arquivo lido · 1 segredo
+saída: 1

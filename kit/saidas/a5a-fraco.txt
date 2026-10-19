@@ -1,0 +1,9 @@
+== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: fraco
+bloqueado 1 · Host de fora (DNS rebinding) → HTTP 401 (o token barrou; servidor sem token cairia)
+PASSOU    2 · token na query string → aceito
+PASSOU    3 · token de outro recurso → aceito
+PASSOU    4 · escopo de leitura confirma agendamento → agendado: m-101 para ana
+PASSOU    5 · handle de outro usuário → agendado: m-102 para ana
+bloqueado 6 · token vencido → invalid_token: Token has expired
+passaram: 4 de 6
+saída: 1

@@ -1,0 +1,5 @@
+== node v24.13.0 · draft-ietf-webbotauth-httpsig-protocol-00 (01/09/2026)
+keyid calculado: poqkLGiymh_W0uP6PZFw-dvez3QJT5SolqXBCW38r0U · confere
+assinatura: RdNFx5Bj6au3YgAMQL/RzmUl… · confere
+vetor E.2.1: confere
+saída: 0

@@ -1,0 +1,9 @@
+== Chromium 156.0.8078.4 (Playwright) · 2026-10-19
+ok    1 página: RESULTADO: 0 falhas
+ok    2 fallback: sem WebMCP: 4 itens na tela, 0 erros de JS
+ok    3 exposição: 1 página(s) sem ferramenta com tools=()
+ok    4 catálogo: 5 ferramentas · 0 achados
+ok    5 servidor: passaram: 0 de 6
+ok    6 segredos: 70 arquivos lidos · 0 segredos
+AUDITORIA: 6/6 ok · relatório: relatorio-seguranca.md
+saída: 0

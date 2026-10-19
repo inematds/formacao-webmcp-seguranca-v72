@@ -1,0 +1,10 @@
+ACHADO search-web: descrição com cara de instrução para o agente (§6.3.1.1 envenenamento)
+ACHADO search-web: pede dado pessoal que a tarefa não precisa: query (§6.3.3 excesso de parâmetros)
+ACHADO search-web: entrada aberta (aceita campo extra) (texto sem limite: query) (§6.3.1.3 a ferramenta como alvo)
+ACHADO finalizeCart: não diz se só lê ou se tem consequência; o nome não diz o efeito (§6.3.2 intenção)
+ACHADO search-dresses: pede dado pessoal que a tarefa não precisa: age, pregnant, location, skinTone (§6.3.3 excesso de parâmetros)
+ACHADO search-dresses: entrada aberta (aceita campo extra) (texto sem limite: size, location, skinTone) (§6.3.1.3 a ferramenta como alvo)
+ACHADO reset-password: não diz se só lê ou se tem consequência (§6.3.2 intenção)
+ACHADO reset-password: entrada aberta (aceita campo extra) (texto sem limite: username, justification) (§6.3.1.3 a ferramenta como alvo)
+4 ferramentas · 8 achados
+saída: 1

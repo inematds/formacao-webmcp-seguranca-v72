@@ -1,0 +1,10 @@
+== node v24.13.0 · draft-ietf-webbotauth-httpsig-protocol-00 (01/09/2026) · origem http://127.0.0.1:36913
+1 · sem assinatura → anônimo: sem assinatura (a política do site decide)
+2 · assinado, válido → identificado: https://agente.exemplo (chave gw6T0rIc…)
+3 · mesma assinatura em outro caminho → recusado: assinatura não confere
+4 · assinatura vencida → recusado: assinatura vencida
+5 · chave que a origem não conhece → recusado: chave desconhecida para https://agente.exemplo
+6 · replay dentro da validade → identificado: https://agente.exemplo (chave gw6T0rIc…)
+7 · assinatura mínima (só @authority) usada em /admin → identificado: https://agente.exemplo (chave gw6T0rIc…)
+7/7 casos como esperado · replay dentro da validade: aceito
+saída: 0

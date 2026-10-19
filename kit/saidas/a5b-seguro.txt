@@ -1,0 +1,9 @@
+== @modelcontextprotocol/server 2.3.1 · MCP 2026-07-28 · servidor: seguro
+bloqueado 1 · Host de fora (DNS rebinding) → HTTP 403 (Host recusado antes do token)
+bloqueado 2 · token na query string → invalid_token: Missing Authorization header
+bloqueado 3 · token de outro recurso → invalid_token: Token was not issued for this resource
+bloqueado 4 · escopo de leitura confirma agendamento → Insufficient scope: required "mentorias:agendar"
+bloqueado 5 · handle de outro usuário → rascunho não encontrado
+bloqueado 6 · token vencido → invalid_token: Token has expired
+passaram: 0 de 6
+saída: 0

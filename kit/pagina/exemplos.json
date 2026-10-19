@@ -1,0 +1,6 @@
+{
+  "_leia": "Entradas de exemplo que o checar.mjs usa para chamar cada ferramenta. Ferramenta fora daqui é chamada com {}.",
+  "ler_avaliacoes": { "id": "m-101" },
+  "agendar_mentoria": { "id": "m-101", "nome": "Teste" },
+  "cancelar_agendamento": { "codigo": "AG-1" }
+}

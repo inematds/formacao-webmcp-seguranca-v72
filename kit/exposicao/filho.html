@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- filho.html — a página dentro do iframe (pode ser de outra origem). Tenta registrar uma ferramenta.
+     Parâmetro (só para o laboratório): ?exposto=<origem>  vira  registerTool(..., { exposedTo: [<origem>] }) -->
+<meta charset="utf-8">
+<title>iframe</title>
+<script>
+  (async () => {
+    const q = new URLSearchParams(location.search);
+    const mc = document.modelContext;
+    let estado = 'sem WebMCP';
+    if (mc) {
+      try {
+        const opcoes = q.get('exposto') ? { exposedTo: [q.get('exposto')] } : {};
+        await mc.registerTool({ name: 'ferramenta_iframe', description: 'Ferramenta do iframe.',
+          inputSchema: { type: 'object', properties: {} }, execute: async () => ({ ok: true }) }, opcoes);
+        estado = 'registrou';
+      } catch (e) { estado = 'recusou: ' + e.name; }
+    }
+    parent.postMessage({ iframe: estado }, '*');
+  })();
+</script>

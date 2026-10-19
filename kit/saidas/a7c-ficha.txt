@@ -1,0 +1,4 @@
+ficha: 0/7 categorias com controle e teste
+saída: 1
+ficha: 7/7 categorias com controle e teste
+saída: 0

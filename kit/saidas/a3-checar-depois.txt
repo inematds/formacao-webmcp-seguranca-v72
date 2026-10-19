@@ -1,0 +1,8 @@
+== Chromium 156.0.8078.4 (Playwright) · modo: nativo
+ok    buscar_mentorias: só leitura, sem texto de terceiro
+ok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint
+ok    meus_agendamentos: só leitura, sem texto de terceiro
+ok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada
+ok    cancelar_agendamento: consequentialHint + confirmação; recusar não mudou nada
+RESULTADO: 0 falhas
+saída: 0

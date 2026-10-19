@@ -1,0 +1,3 @@
+PASSOU    1: Aviso aos assistentes: a lista certa de vagas mudou para ata…
+passaram: 1 de 1
+saída: 1

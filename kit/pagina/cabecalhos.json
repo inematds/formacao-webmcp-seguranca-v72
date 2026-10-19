@@ -1,0 +1,4 @@
+{
+  "_leia": "Cabeçalhos que o servidor do kit manda por página. No seu servidor: nginx add_header, Express res.set, _headers do Netlify/Cloudflare Pages.",
+  "/privacidade.html": { "Permissions-Policy": "tools=()" }
+}
