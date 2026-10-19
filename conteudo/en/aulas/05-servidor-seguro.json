@@ -155,7 +155,7 @@
       "sub": "A minimal checker (it does not replace gitleaks or GitHub's secret scanning). The second command plants a fake key in a rehearsal folder so you can see it get flagged.",
       "blocos": [
         {
-          "rot": "Terminal · segredos",
+          "rot": "Terminal · secrets",
           "icone": "terminal",
           "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/segredos.mjs .; echo \"saída: $?\"\nE=${TMPDIR:-/tmp}/ensaio-seguranca/vazou; mkdir -p $E\nprintf \"export const API_KEY = '%s';\\n\" $(openssl rand -hex 16) > $E/config.mjs\nnode scripts/segredos.mjs $E; echo \"saída: $?\""
         }
@@ -179,14 +179,14 @@
           "id": "e13",
           "titulo": "E13 · Weak server",
           "min": "5 min",
-          "texto": "Run the <b>fraco</b> block and note which four attacks got through.",
+          "texto": "Run the <b>weak</b> block and note which four attacks got through.",
           "pronto": "<code>passaram: 4 de 6</code> and <code>saída: 1</code>."
         },
         {
           "id": "e14",
           "titulo": "E14 · Secure server",
           "min": "10 min",
-          "texto": "Run the <b>seguro</b> block. Then, in <code>mcp/servidor.mjs</code>, remove <code>expectedResource</code> from secure mode and run it again. Undo it at the end.",
+          "texto": "Run the <b>secure</b> block. Then, in <code>mcp/servidor.mjs</code>, remove <code>expectedResource</code> from secure mode and run it again. Undo it at the end.",
           "pronto": "<code>passaram: 0 de 6</code>; without <code>expectedResource</code>, <code>PASSOU    3 · token de outro recurso</code>."
         },
         {

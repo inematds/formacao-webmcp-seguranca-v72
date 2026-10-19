@@ -35,12 +35,12 @@
     {
       "tipo": "diagrama",
       "titulo": "Seis verificaciones",
-      "sub": "Una por lección del curso. Haz clic en cada una.",
+      "sub": "Una por clase del curso. Haz clic en cada una.",
       "nos": [
         {
           "icone": "chat",
           "titulo": "Página",
-          "sub": "lecciones 2–3",
+          "sub": "clases 2–3",
           "detalhe": "checar.mjs: texto de terceros marcado con untrustedContentHint; acción con consecuencias con anotación y confirmación que, si se rechaza, no cambia nada."
         },
         {
@@ -52,35 +52,35 @@
         {
           "icone": "portao",
           "titulo": "Exposición",
-          "sub": "lección 4",
+          "sub": "clase 4",
           "detalhe": "Toda página .html que no es la principal envía Permissions-Policy: tools=()."
         },
         {
           "icone": "lista",
           "titulo": "Catálogo",
-          "sub": "lección 7",
+          "sub": "clase 7",
           "detalhe": "ameacas.mjs sin hallazgos en las definiciones de la página."
         },
         {
           "icone": "cadeado",
           "titulo": "Servidor",
-          "sub": "lección 5",
+          "sub": "clase 5",
           "detalhe": "atacar-mcp.mjs seguro: ninguno de los 6 ataques pasa."
         },
         {
           "icone": "escudo",
           "titulo": "Secretos",
-          "sub": "lección 5",
+          "sub": "clase 5",
           "forte": true,
           "detalhe": "segredos.mjs en la carpeta del kit: ninguna clave escrita en archivos."
         }
       ],
-      "legenda": "Web Bot Auth (lección 6) no entra: es una decisión de política, que se revisa en la ficha y en politica-bots.md."
+      "legenda": "Web Bot Auth (clase 6) no entra: es una decisión de política, que se revisa en la ficha y en politica-bots.md."
     },
     {
       "tipo": "codigo",
       "titulo": "La auditoría del kit",
-      "sub": "Con los dos fallos corregidos (lecciones 2 y 3). Guarda kit/relatorio-seguranca.md con la fecha.",
+      "sub": "Con los dos fallos corregidos (clases 2 y 3). Guarda kit/relatorio-seguranca.md con la fecha.",
       "blocos": [
         {
           "rot": "Terminal · auditar",
@@ -90,7 +90,7 @@
         {
           "rot": "Archivo · kit/scripts/auditar.mjs",
           "icone": "arquivo",
-          "conteudo": "// auditar.mjs — la auditoría de seguridad de todo el curso en una sola ejecución (lección 8).\n// 6 verificaciones, cada una de una lección; guarda relatorio-seguranca.md con fecha y resultado.\n//   1 página      checar.mjs: texto de terceros marcado; la acción con consecuencias pide confirmación (lecciones 2–3)\n//   2 fallback    la página funciona sin WebMCP (el caso de la mayoría de los visitantes)\n//   3 exposição   toda página .html que no es index envía Permissions-Policy con tools=() (lección 4)\n//   4 catálogo    ameacas.mjs sin hallazgos (lección 7)\n//   5 servidor    atacar-mcp.mjs seguro: 0 de 6 ataques pasan (lección 5)\n//   6 segredos    segredos.mjs en la carpeta del kit: 0 secretos (lección 5)\n// Uso: node scripts/auditar.mjs     (PAGINA=<carpeta> y CATALOGO=<archivo> para tu copia)\n// Salida 0 = 6/6; 1 = alguna falló.\nimport { spawnSync } from 'node:child_process';\nimport { readdirSync, writeFileSync } from 'node:fs';\nimport { resolve } from 'node:path';\nimport { KIT, pastaPagina, servir, abrir } from '../lib/navegador.mjs';\n\nconst node = (...args) => spawnSync(process.execPath, args, { cwd: KIT, encoding: 'utf8', timeout: 240000 });\nconst ultima = r => (r.stdout || r.stderr || '').trim().split('\\n').at(-1);\nconst res = [];\nconst anotar = (n, nome, ok, det) => { res.push({ n, nome, ok, det }); console.log(`${ok ? 'ok   ' : 'FALHA'} ${n} ${nome}: ${det}`); };\n\nconst pasta = pastaPagina();\nconst s0 = await abrir('sem');\nconsole.log(`== ${s0.versao.replace(' · modo: sem', '')} · ${new Date().toISOString().slice(0, 10)}`);\n\nlet r = node('scripts/checar.mjs');\nanotar(1, 'página', r.status === 0, ultima(r));\n\nconst fb = await s0.page.evaluate(() => ({ modo: document.documentElement.dataset.webmcp, itens: document.querySelectorAll('li').length }));\nanotar(2, 'fallback', fb.modo === 'sem' && fb.itens > 0 && !s0.erros.length, `sem WebMCP: ${fb.itens} itens na tela, ${s0.erros.length} erros de JS`);\nawait s0.fechar();\n\nconst srv = await servir(pasta);\nconst paginas = readdirSync(pasta).filter(f => f.endsWith('.html') && f !== 'index.html');\nconst sem = [];\nfor (const p of paginas) {\n  const pp = (await fetch(srv.url + p)).headers.get('permissions-policy') || '';\n  if (!/\\btools=\\(\\)/.test(pp)) sem.push(p);\n}\nawait srv.fechar();\nanotar(3, 'exposição', sem.length === 0, sem.length ? `sem Permissions-Policy tools=(): ${sem.join(', ')}` : `${paginas.length} página(s) sem ferramenta com tools=()`);\n\nr = node('scripts/ameacas.mjs', process.env.CATALOGO || resolve(pasta, 'ferramentas.mjs'));\nanotar(4, 'catálogo', r.status === 0, ultima(r));\n\nr = node('scripts/atacar-mcp.mjs', 'seguro');\nanotar(5, 'servidor', r.status === 0, ultima(r));\n\nr = node('scripts/segredos.mjs', '.');\nanotar(6, 'segredos', r.status === 0, ultima(r));\n\nconst okN = res.filter(x => x.ok).length;\nconst hoje = new Date().toISOString().slice(0, 10);\nwriteFileSync(resolve(KIT, 'relatorio-seguranca.md'),\n  `# Relatório de segurança — ${hoje}\\n\\nSpec WebMCP: rascunho CG de 16/10/2026 · MCP 2026-07-28\\n\\n| # | verificação | resultado | detalhe |\\n|---|---|---|---|\\n` +\n  res.map(x => `| ${x.n} | ${x.nome} | ${x.ok ? 'ok' : 'FALHA'} | ${x.det.replace(/\\|/g, '/')} |`).join('\\n') +\n  `\\n\\nTotal: ${okN}/6. Rode de novo a cada mudança de ferramenta, de dependência ou da spec.\\n`);\nconsole.log(`AUDITORIA: ${okN}/6 ok · relatório: relatorio-seguranca.md`);\nprocess.exit(okN === 6 ? 0 : 1);"
+          "conteudo": "// auditar.mjs — la auditoría de seguridad de todo el curso en una sola ejecución (clase 8).\n// 6 verificaciones, cada una de una clase; guarda relatorio-seguranca.md con fecha y resultado.\n//   1 página      checar.mjs: texto de terceros marcado; la acción con consecuencias pide confirmación (clases 2–3)\n//   2 fallback    la página funciona sin WebMCP (el caso de la mayoría de los visitantes)\n//   3 exposição   toda página .html que no es index envía Permissions-Policy con tools=() (clase 4)\n//   4 catálogo    ameacas.mjs sin hallazgos (clase 7)\n//   5 servidor    atacar-mcp.mjs seguro: 0 de 6 ataques pasan (clase 5)\n//   6 segredos    segredos.mjs en la carpeta del kit: 0 secretos (clase 5)\n// Uso: node scripts/auditar.mjs     (PAGINA=<carpeta> y CATALOGO=<archivo> para tu copia)\n// Salida 0 = 6/6; 1 = alguna falló.\nimport { spawnSync } from 'node:child_process';\nimport { readdirSync, writeFileSync } from 'node:fs';\nimport { resolve } from 'node:path';\nimport { KIT, pastaPagina, servir, abrir } from '../lib/navegador.mjs';\n\nconst node = (...args) => spawnSync(process.execPath, args, { cwd: KIT, encoding: 'utf8', timeout: 240000 });\nconst ultima = r => (r.stdout || r.stderr || '').trim().split('\\n').at(-1);\nconst res = [];\nconst anotar = (n, nome, ok, det) => { res.push({ n, nome, ok, det }); console.log(`${ok ? 'ok   ' : 'FALHA'} ${n} ${nome}: ${det}`); };\n\nconst pasta = pastaPagina();\nconst s0 = await abrir('sem');\nconsole.log(`== ${s0.versao.replace(' · modo: sem', '')} · ${new Date().toISOString().slice(0, 10)}`);\n\nlet r = node('scripts/checar.mjs');\nanotar(1, 'página', r.status === 0, ultima(r));\n\nconst fb = await s0.page.evaluate(() => ({ modo: document.documentElement.dataset.webmcp, itens: document.querySelectorAll('li').length }));\nanotar(2, 'fallback', fb.modo === 'sem' && fb.itens > 0 && !s0.erros.length, `sem WebMCP: ${fb.itens} itens na tela, ${s0.erros.length} erros de JS`);\nawait s0.fechar();\n\nconst srv = await servir(pasta);\nconst paginas = readdirSync(pasta).filter(f => f.endsWith('.html') && f !== 'index.html');\nconst sem = [];\nfor (const p of paginas) {\n  const pp = (await fetch(srv.url + p)).headers.get('permissions-policy') || '';\n  if (!/\\btools=\\(\\)/.test(pp)) sem.push(p);\n}\nawait srv.fechar();\nanotar(3, 'exposição', sem.length === 0, sem.length ? `sem Permissions-Policy tools=(): ${sem.join(', ')}` : `${paginas.length} página(s) sem ferramenta com tools=()`);\n\nr = node('scripts/ameacas.mjs', process.env.CATALOGO || resolve(pasta, 'ferramentas.mjs'));\nanotar(4, 'catálogo', r.status === 0, ultima(r));\n\nr = node('scripts/atacar-mcp.mjs', 'seguro');\nanotar(5, 'servidor', r.status === 0, ultima(r));\n\nr = node('scripts/segredos.mjs', '.');\nanotar(6, 'segredos', r.status === 0, ultima(r));\n\nconst okN = res.filter(x => x.ok).length;\nconst hoje = new Date().toISOString().slice(0, 10);\nwriteFileSync(resolve(KIT, 'relatorio-seguranca.md'),\n  `# Relatório de segurança — ${hoje}\\n\\nSpec WebMCP: rascunho CG de 16/10/2026 · MCP 2026-07-28\\n\\n| # | verificação | resultado | detalhe |\\n|---|---|---|---|\\n` +\n  res.map(x => `| ${x.n} | ${x.nome} | ${x.ok ? 'ok' : 'FALHA'} | ${x.det.replace(/\\|/g, '/')} |`).join('\\n') +\n  `\\n\\nTotal: ${okN}/6. Rode de novo a cada mudança de ferramenta, de dependência ou da spec.\\n`);\nconsole.log(`AUDITORIA: ${okN}/6 ok · relatório: relatorio-seguranca.md`);\nprocess.exit(okN === 6 ? 0 : 1);"
         }
       ],
       "saida": {
@@ -149,7 +149,7 @@
         {
           "titulo": "Cuándo ejecutarla",
           "texto": [
-            "Con cada tool nueva, con cada actualización de dependencias y cuando cambie la spec. WebMCP es un borrador: el origin trial llega hasta Chrome 156 y la API ya cambió de nombre una vez."
+            "En cada tool nueva, en cada actualización de dependencias y cuando cambie la spec. WebMCP es un borrador: el origin trial llega hasta Chrome 156 (el 19 de octubre de 2026) y la API ya cambió de nombre una vez, de <code>navigator.modelContext</code> a <code>document.modelContext</code>."
           ]
         }
       ]
@@ -157,12 +157,12 @@
     {
       "tipo": "mapa",
       "titulo": "El mapa del curso",
-      "sub": "Cuatro entregas, ocho lecciones. Haz clic en un ejercicio para ver el \"listo cuando\".",
+      "sub": "Cuatro entregas, ocho clases. Haz clic en un ejercicio para ver el \"listo cuando\".",
       "degraus": [
         {
           "aula": "sem-solucao",
           "icone": "lupa",
-          "quando": "Lecciones 1–2",
+          "quando": "Clases 1–2",
           "titulo": "Texto",
           "sub": "inyección + marca",
           "saida": "Texto de terceros encontrado y marcado.",
@@ -171,7 +171,7 @@
         {
           "aula": "consequencia",
           "icone": "portao",
-          "quando": "Lecciones 3–4",
+          "quando": "Clases 3–4",
           "titulo": "Frenos",
           "sub": "confirmación + origen",
           "saida": "Una acción pide a una persona; solo debe verla quien corresponde.",
@@ -272,7 +272,7 @@
           "id": "e23",
           "titulo": "E23 · La rotura se detecta",
           "min": "5 min",
-          "texto": "Ejecuta el bloque <b>quebra</b>.",
+          "texto": "Ejecuta el bloque <b>rotura</b>.",
           "pronto": "<code>FALHA 6 segredos</code>, <code>AUDITORIA: 5/6 ok</code> y <code>saída: 1</code>; después del <code>rm</code>, la auditoría vuelve a 6/6."
         },
         {
@@ -280,7 +280,7 @@
           "titulo": "E24 · Tu sitio y la fecha",
           "min": "30 min",
           "texto": "Ejecuta la auditoría con <code>PAGINA</code> y <code>CATALOGO</code> de tu sitio, genera el plan de arriba y marca en el calendario la próxima revisión.",
-          "pronto": "<code>PAGINA=[tu carpeta] node scripts/auditar.mjs</code> guarda un <code>relatorio-seguranca.md</code> con la fecha de hoy, y el <code>.ics</code> del plan queda en tu calendario."
+          "pronto": "<code>PAGINA=[tu carpeta] node scripts/auditar.mjs</code> y después <code>head -1 relatorio-seguranca.md</code> → <code># Relatório de segurança — [fecha de hoy]</code>; <code>ls [tu carpeta de descargas]/plano-*.ics</code> → el archivo del plan."
         }
       ]
     },
@@ -322,7 +322,7 @@
             "Nunca, después del primer 6/6"
           ],
           "certa": 0,
-          "explica": "Cada uno de esos cambios puede abrir un hueco que ya estaba cerrado. El origin trial llega hasta Chrome 156 y la API ya cambió de nombre una vez.",
+          "explica": "Cada uno de esos cambios puede abrir un hueco que ya estaba cerrado. El 19 de octubre de 2026, el origin trial llega hasta Chrome 156 y la API ya cambió de nombre una vez (de <code>navigator.modelContext</code> a <code>document.modelContext</code>).",
           "ref": "passos"
         },
         {

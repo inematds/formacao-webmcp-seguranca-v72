@@ -166,14 +166,14 @@
           "id": "e10",
           "titulo": "E10 · Seven cases",
           "min": "5 min",
-          "texto": "Run the <b>exposição</b> block.",
+          "texto": "Run the <b>exposure</b> block.",
           "pronto": "<code>7/7 casos conferem com a spec</code> and <code>saída: 0</code>."
         },
         {
           "id": "e11",
           "titulo": "E11 · Kit header",
           "min": "3 min",
-          "texto": "Run the <b>cabeçalho</b> block.",
+          "texto": "Run the <b>header</b> block.",
           "pronto": "<code>Permissions-Policy: tools=()</code> on the privacy page and <code>0</code> on the main page."
         },
         {

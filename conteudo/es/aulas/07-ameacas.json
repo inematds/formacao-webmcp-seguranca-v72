@@ -5,7 +5,7 @@
   "titulo": "Modelado de amenazas de una tool",
   "titulo_curto": "Modelar amenazas",
   "minutos": 20,
-  "lead": "La spec de WebMCP lista las amenazas de una tool en siete categorías, desde la descripción envenenada hasta la navegación privada, y admite que no hay forma de verificar que la tool haga lo que dice. En esta clase pasas el catálogo por un linter que encuentra lo obvio y llenas la ficha que cubre el resto.",
+  "lead": "El curso organiza las amenazas de la §6.3 de la spec de WebMCP en siete categorías (los tres vectores de la §6.3.1 y las secciones 6.3.2 a 6.3.5), y la spec admite que no hay cómo verificar si la tool hace lo que dice. En esta clase pasas el catálogo por un linter que encuentra lo obvio y completas la ficha que cubre el resto.",
   "objetivo": "modelar las amenazas de cada tool en las 7 categorías de la spec y pasar el catálogo por un linter de envenenamiento, exceso de parámetros y efecto oculto.",
   "competencias": [
     "modelar-ameacas-por-ferramenta",
@@ -94,7 +94,7 @@
           "titulo": "Intención",
           "sub": "§6.3.2",
           "texto": [
-            "Nombre y descripción que esconden el efecto (finalizeCart, lección 3)."
+            "Nombre y descripción que esconden el efecto (finalizeCart, clase 3)."
           ]
         },
         {
@@ -108,7 +108,7 @@
           "titulo": "Origen",
           "sub": "§6.3.4",
           "texto": [
-            "Estado llevado de un origen a otro. En la spec del 16 de octubre de 2026 la sección todavía es solo una nota pendiente; el control está en la lección 4."
+            "Estado llevado de un origen a otro. En la spec del 16 de octubre de 2026 la sección todavía es solo una nota pendiente; el control está en la clase 4."
           ]
         },
         {
@@ -149,7 +149,7 @@
     {
       "tipo": "codigo",
       "titulo": "Las mismas intenciones, sin hallazgos",
-      "sub": "catalogos/bom.mjs y la página del kit después de las lecciones 2 y 3.",
+      "sub": "catalogos/bom.mjs y la página del kit después de las clases 2 y 3.",
       "blocos": [
         {
           "rot": "Terminal · bom",
@@ -175,7 +175,7 @@
     {
       "tipo": "codigo",
       "titulo": "La ficha de amenazas",
-      "sub": "Copia el modelo para cada tool que cambia algo. El ficha.mjs comprueba que las 7 categorías tengan control y prueba completos (acepta las etiquetas en PT, EN y ES).",
+      "sub": "Copia el modelo para cada tool que cambie algo. El archivo del kit está en portugués; ficha.mjs comprueba que las 7 categorías tengan control y prueba completados, y acepta las etiquetas en PT, EN y ES.",
       "blocos": [
         {
           "rot": "Terminal · ficha",

@@ -5,7 +5,7 @@
   "titulo": "Modelagem de ameaças de uma ferramenta",
   "titulo_curto": "Modelar ameaças",
   "minutos": 20,
-  "lead": "A spec do WebMCP lista as ameaças de uma ferramenta em sete categorias, da descrição envenenada à navegação privada, e admite que não há como verificar se a ferramenta faz o que diz. Nesta aula você passa o catálogo num linter que acha o óbvio e preenche a ficha que cobre o resto.",
+  "lead": "O curso organiza as ameaças da §6.3 da spec do WebMCP em sete categorias (os três vetores da §6.3.1 e as seções 6.3.2 a 6.3.5), e a spec admite que não há como verificar se a ferramenta faz o que diz. Nesta aula você passa o catálogo num linter que acha o óbvio e preenche a ficha que cobre o resto.",
   "objetivo": "modelar as ameaças de cada ferramenta nas 7 categorias da spec e passar o catálogo num linter que acha envenenamento, excesso de parâmetros e efeito escondido.",
   "competencias": [
     "modelar-ameacas-por-ferramenta",
@@ -175,7 +175,7 @@
     {
       "tipo": "codigo",
       "titulo": "A ficha de ameaças",
-      "sub": "Copie o modelo para cada ferramenta que muda algo. O ficha.mjs confere se as 7 categorias têm controle e teste preenchidos (aceita os rótulos em PT, EN e ES).",
+      "sub": "Copie o modelo para cada ferramenta que muda algo. O arquivo do kit está em português; o ficha.mjs confere se as 7 categorias têm controle e teste preenchidos e aceita os rótulos em PT, EN e ES.",
       "blocos": [
         {
           "rot": "Terminal · ficha",

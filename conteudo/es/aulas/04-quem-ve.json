@@ -5,7 +5,7 @@
   "titulo": "Quién ve la tool: mismo origin, exposedTo, iframes y Permissions-Policy",
   "titulo_curto": "Quién ve la tool",
   "minutos": 18,
-  "lead": "Por defecto, solo la propia página y las del mismo origin ven la tool. Un iframe de otro origin solo aparece para la página superior con tres consentimientos, y un encabezado lo apaga todo. En esta lección mides los siete casos en Chromium y pones Permissions-Policy: tools=() en las páginas que no necesitan WebMCP.",
+  "lead": "Por defecto, solo la propia página y las del mismo origin ven la tool. Un iframe de otro origin solo aparece para la página superior con tres consentimientos, y un encabezado lo apaga todo. En esta clase mides los siete casos en Chromium y pones Permissions-Policy: tools=() en las páginas que no necesitan WebMCP.",
   "objetivo": "medir quién ve cada tool (mismo origin, iframe, exposedTo, fromOrigins) y apagar WebMCP con Permissions-Policy donde no debe existir.",
   "competencias": [
     "explicar-exposicao-por-origem",
@@ -166,14 +166,14 @@
           "id": "e10",
           "titulo": "E10 · Siete casos",
           "min": "5 min",
-          "texto": "Ejecuta el bloque <b>exposição</b>.",
+          "texto": "Ejecuta el bloque <b>exposición</b>.",
           "pronto": "<code>7/7 casos conferem com a spec</code> y <code>saída: 0</code>."
         },
         {
           "id": "e11",
           "titulo": "E11 · Encabezado del kit",
           "min": "3 min",
-          "texto": "Ejecuta el bloque <b>cabeçalho</b>.",
+          "texto": "Ejecuta el bloque <b>encabezado</b>.",
           "pronto": "<code>Permissions-Policy: tools=()</code> en la página de privacidad y <code>0</code> en la principal."
         },
         {
@@ -218,7 +218,7 @@
           "p": "¿Qué pasa con exposedTo: ['http://exemplo.com']?",
           "opcoes": [
             "El documento superior pasa a ver la tool sin necesitar fromOrigins",
-            "registerTool rechaza con SecurityError: origem não confiável",
+            "registerTool rechaza con SecurityError: origen no confiable",
             "La tool queda visible para todos los orígenes del mundo, sin excepción",
             "No cambia nada: la lista se ignora fuera de Chrome Canary"
           ],

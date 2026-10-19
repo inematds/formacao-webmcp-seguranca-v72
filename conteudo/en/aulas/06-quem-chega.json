@@ -152,7 +152,7 @@
           "id": "e16",
           "titulo": "E16 · Draft vector",
           "min": "3 min",
-          "texto": "Run the <b>vetor</b> block.",
+          "texto": "Run the <b>vector</b> block.",
           "pronto": "<code>vetor E.2.1: confere</code> and <code>saída: 0</code>."
         },
         {
@@ -166,7 +166,7 @@
           "id": "e18",
           "titulo": "E18 · Your site's policy",
           "min": "15 min",
-          "texto": "Create <code>politica-bots.md</code> with three lines, one per case, starting with <code>anônimo:</code>, <code>assinado e conhecido:</code> and <code>assinado e desconhecido:</code>, each with what the site does (allow, limit, block, on which pages).",
+          "texto": "Create <code>politica-bots.md</code> with three lines, one per case, starting with <code>anônimo:</code>, <code>assinado e conhecido:</code> and <code>assinado e desconhecido:</code>, each with what the site does (allow, limit, block, on which pages). The prefixes stay in Portuguese because the check command looks for them.",
           "pronto": "<code>grep -c -E \"^(anônimo|assinado e conhecido|assinado e desconhecido):\" politica-bots.md</code> → <code>3</code>."
         }
       ]

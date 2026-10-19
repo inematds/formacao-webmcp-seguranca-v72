@@ -5,7 +5,7 @@
   "titulo": "Identificar quién llega: Web Bot Auth y signed agents (borrador del IETF)",
   "titulo_curto": "Quién llega",
   "minutos": 18,
-  "lead": "User-Agent lo puede escribir cualquiera. Web Bot Auth es la propuesta del IETF para que el bot firme cada solicitud con una clave publicada en una URL suya. Todavía es un borrador (-00, septiembre de 2026). En esta lección compruebas una firma contra el vector del draft y ves en un servidor local qué prueba y qué no prueba.",
+  "lead": "User-Agent lo puede escribir cualquiera. Web Bot Auth es la propuesta del IETF para que el bot firme cada solicitud con una clave publicada en una URL suya. Todavía es un borrador (-00, septiembre de 2026). En esta clase compruebas una firma contra el vector del draft y ves en un servidor local qué prueba y qué no prueba.",
   "objetivo": "comprobar una firma Web Bot Auth con el vector del draft y verificar solicitudes firmadas en un servidor local, sabiendo lo que la firma no prueba.",
   "competencias": [
     "explicar-web-bot-auth",
@@ -152,7 +152,7 @@
           "id": "e16",
           "titulo": "E16 · Vector del draft",
           "min": "3 min",
-          "texto": "Ejecuta el bloque <b>vetor</b>.",
+          "texto": "Ejecuta el bloque <b>vector</b>.",
           "pronto": "<code>vetor E.2.1: confere</code> y <code>saída: 0</code>."
         },
         {
@@ -166,7 +166,7 @@
           "id": "e18",
           "titulo": "E18 · Política de tu sitio",
           "min": "15 min",
-          "texto": "Crea <code>politica-bots.md</code> con tres líneas, una por caso, que empiecen por <code>anônimo:</code>, <code>assinado e conhecido:</code> y <code>assinado e desconhecido:</code>, cada una con lo que hace el sitio (permitir, limitar, bloquear, en qué páginas).",
+          "texto": "Crea <code>politica-bots.md</code> con tres líneas, una por caso, que empiecen por <code>anônimo:</code>, <code>assinado e conhecido:</code> y <code>assinado e desconhecido:</code>, cada una con lo que hace el sitio (permitir, limitar, bloquear, en qué páginas). Los prefijos quedan en portugués porque el comando de verificación los busca.",
           "pronto": "<code>grep -c -E \"^(anônimo|assinado e conhecido|assinado e desconhecido):\" politica-bots.md</code> → <code>3</code>."
         }
       ]

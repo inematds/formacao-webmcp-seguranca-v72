@@ -41,13 +41,13 @@
           "icone": "texto",
           "titulo": "Descrição",
           "sub": "envenenada",
-          "detalhe": "Instrução escondida no nome, na descrição ou na descrição de um parâmetro da ferramenta (<i>tool poisoning</i>). Quem ataca: o próprio site, ou um script de terceiro que ele carrega."
+          "detalhe": "Instrução escondida no nome, na descrição ou na descrição de um parâmetro da ferramenta (<i>tool poisoning</i>). Quem ataca: um site malicioso que publica a ferramenta (§6.3.1.1). No seu site, o mesmo efeito vem de um script de terceiro comprometido (§6.4.1)."
         },
         {
           "icone": "chat",
           "titulo": "Saída",
           "sub": "injetada",
-          "detalhe": "Instrução dentro do que a ferramenta devolve: uma avaliação, um post de fórum, um comentário. Quem ataca: qualquer visitante que escreve no seu site."
+          "detalhe": "Instrução dentro do que a ferramenta devolve: uma avaliação, um post de fórum, um comentário. Quem ataca: o próprio site malicioso ou qualquer visitante que escreve conteúdo no seu site."
         },
         {
           "icone": "alvo",
@@ -81,7 +81,7 @@
           "titulo": "OpenAI",
           "sub": "22/12/2025 · relatado",
           "texto": [
-            "A OpenAI publicou \"Hardening Atlas against prompt injection\", sobre red team automatizado. A cobertura da imprensa relata a frase de que o problema \"is unlikely to ever be fully solved\".",
+            "Segundo a imprensa, a OpenAI publicou \"Hardening Atlas against prompt injection\", sobre red team automatizado. A cobertura da imprensa relata a frase de que o problema \"is unlikely to ever be fully solved\".",
             "A página da OpenAI respondeu 403 quando tentamos ler em 19/10/2026: fica como relatado, não confirmado na fonte."
           ]
         },
@@ -117,7 +117,7 @@
         "abas": [
           {
             "rot": "Saída capturada (19/10/2026)",
-            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>Nesta captura o Chromium 156 do Playwright já estava baixado na máquina; na primeira vez, o último comando mostra as linhas de download antes do <code>saída: 0</code>.</p>"
+            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>Caminho abreviado com <code>~</code> na captura. Nela o Chromium 156 do Playwright já estava baixado na máquina; na primeira vez, o último comando mostra as linhas de download antes do <code>saída: 0</code>.</p>"
           }
         ]
       }
@@ -192,7 +192,7 @@
           "id": "e3",
           "titulo": "E3 · O seu ataque",
           "min": "10 min",
-          "texto": "Troque o texto do bloco <b>meu ataque</b> por um ataque seu, em português, sem nenhuma palavra das regras do <code>filtro.mjs</code>.",
+          "texto": "Troque o texto do bloco <b>meu ataque</b> por um ataque seu, em qualquer idioma, que não use nenhuma palavra das regras do <code>filtro.mjs</code>.",
           "pronto": "<code>passaram: 1 de 1</code> com o seu texto."
         }
       ]

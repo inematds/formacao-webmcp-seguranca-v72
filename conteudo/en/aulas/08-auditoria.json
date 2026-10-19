@@ -149,7 +149,7 @@
         {
           "titulo": "When to run",
           "texto": [
-            "On every new tool, every dependency update and whenever the spec changes. WebMCP is a draft: the origin trial runs through Chrome 156 and the API has already been renamed once."
+            "With every new tool, every dependency update, and whenever the spec changes. WebMCP is a draft: the origin trial runs through Chrome 156 (on October 19, 2026), and the API has already been renamed once, from <code>navigator.modelContext</code> to <code>document.modelContext</code>."
           ]
         }
       ]
@@ -265,14 +265,14 @@
           "id": "e22",
           "titulo": "E22 · Kit audit",
           "min": "10 min",
-          "texto": "With the holes from lessons 2 and 3 fixed, run the <b>auditar</b> block and open <code>relatorio-seguranca.md</code>.",
+          "texto": "With the holes from lessons 2 and 3 fixed, run the <b>audit</b> block and open <code>relatorio-seguranca.md</code>.",
           "pronto": "<code>AUDITORIA: 6/6 ok</code> and <code>saída: 0</code>."
         },
         {
           "id": "e23",
           "titulo": "E23 · Break test",
           "min": "5 min",
-          "texto": "Run the <b>quebra</b> block.",
+          "texto": "Run the <b>break</b> block.",
           "pronto": "<code>FALHA 6 segredos</code>, <code>AUDITORIA: 5/6 ok</code> and <code>saída: 1</code>; after the <code>rm</code>, the audit goes back to 6/6."
         },
         {
@@ -280,7 +280,7 @@
           "titulo": "E24 · Your site and the date",
           "min": "30 min",
           "texto": "Run the audit with <code>PAGINA</code> and <code>CATALOGO</code> from your site, generate the plan above, and mark the next review on your calendar.",
-          "pronto": "<code>PAGINA=[your folder] node scripts/auditar.mjs</code> writes a <code>relatorio-seguranca.md</code> with today's date, and the plan's <code>.ics</code> is in your calendar."
+          "pronto": "<code>PAGINA=[your folder] node scripts/auditar.mjs</code> and then <code>head -1 relatorio-seguranca.md</code> → <code># Relatório de segurança — [today's date]</code>; <code>ls [your downloads folder]/plano-*.ics</code> → the plan file."
         }
       ]
     },
@@ -322,7 +322,7 @@
             "Never, after the first 6/6"
           ],
           "certa": 0,
-          "explica": "Each of these changes can reopen a hole that was already closed. The origin trial runs through Chrome 156, and the API has already been renamed once.",
+          "explica": "Each of these changes can reopen a hole that was already closed. On October 19, 2026, the origin trial runs through Chrome 156, and the API has already been renamed once (from <code>navigator.modelContext</code> to <code>document.modelContext</code>).",
           "ref": "passos"
         },
         {

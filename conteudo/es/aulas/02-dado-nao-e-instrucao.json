@@ -137,7 +137,7 @@
         "abas": [
           {
             "rot": "Salida capturada (19 de octubre de 2026)",
-            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nok    buscar_mentorias: só leitura, sem texto de terceiro\nok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint\nok    meus_agendamentos: só leitura, sem texto de terceiro\nok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada\nFALHA cancelar_agendamento: muda estado sem consequentialHint\nFALHA cancelar_agendamento: agiu sem pedir confirmação\nRESULTADO: 2 falhas\nsaída: 1</pre><p><code>ler_avaliacoes</code> pasó. Las dos fallas que quedan son de la lección 3.</p>"
+            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nok    buscar_mentorias: só leitura, sem texto de terceiro\nok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint\nok    meus_agendamentos: só leitura, sem texto de terceiro\nok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada\nFALHA cancelar_agendamento: muda estado sem consequentialHint\nFALHA cancelar_agendamento: agiu sem pedir confirmação\nRESULTADO: 2 falhas\nsaída: 1</pre><p><code>ler_avaliacoes</code> pasó. Las dos fallas que quedan son de la clase 3.</p>"
           }
         ]
       }
@@ -179,7 +179,7 @@
           "id": "e5",
           "titulo": "E5 · Arréglalo",
           "min": "10 min",
-          "texto": "Edita <code>ler_avaliacoes</code> como en el fragmento (anotación, descripción, campos recortados) y ejecuta el bloque <b>checar depois</b>.",
+          "texto": "Edita <code>ler_avaliacoes</code> como en el fragmento (anotación, descripción, campos recortados) y ejecuta el bloque <b>checar después</b>.",
           "pronto": "<code>ok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint</code> y <code>RESULTADO: 2 falhas</code>."
         },
         {
@@ -237,7 +237,7 @@
           "opcoes": [
             "La nueva descripción de la tool, que avisa al modelo",
             "El corte de 280 caracteres en el texto de las reseñas",
-            "La confirmación en pantalla antes de cancelar (lección 3)",
+            "La confirmación en pantalla antes de cancelar (clase 3)",
             "El readOnlyHint, que impide llamar a otras tools"
           ],
           "certa": 2,

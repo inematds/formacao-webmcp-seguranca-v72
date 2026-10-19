@@ -5,7 +5,7 @@
   "titulo": "Threat modeling for a tool",
   "titulo_curto": "Model the threats",
   "minutos": 20,
-  "lead": "The WebMCP spec lists a tool's threats in seven categories, from the poisoned description to private browsing, and admits there is no way to verify that the tool does what it says. In this lesson you run the catalog through a linter that finds the obvious, and fill in the threat card that covers the rest.",
+  "lead": "The course organizes the threats in §6.3 of the WebMCP spec into seven categories (the three vectors in §6.3.1 and sections 6.3.2 to 6.3.5), and the spec admits there is no way to verify that the tool does what it says. In this lesson you run the catalog through a linter that finds the obvious and fill in the threat card that covers the rest.",
   "objetivo": "model each tool's threats across the spec's 7 categories and run the catalog through a linter that finds poisoning, excess parameters, and hidden effects.",
   "competencias": [
     "modelar-ameacas-por-ferramenta",
@@ -175,7 +175,7 @@
     {
       "tipo": "codigo",
       "titulo": "The threat card",
-      "sub": "Copy the template for each tool that changes something. ficha.mjs checks that all 7 categories have a control and a test filled in (it accepts labels in PT, EN, and ES).",
+      "sub": "Copy the template for each tool that changes something. The kit's file is in Portuguese; ficha.mjs checks that all 7 categories have a control and a test filled in, and it accepts the labels in PT, EN, and ES.",
       "blocos": [
         {
           "rot": "Terminal · ficha",

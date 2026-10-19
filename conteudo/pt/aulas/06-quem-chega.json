@@ -166,7 +166,7 @@
           "id": "e18",
           "titulo": "E18 · Política do seu site",
           "min": "15 min",
-          "texto": "Crie <code>politica-bots.md</code> com três linhas, uma por caso, começando por <code>anônimo:</code>, <code>assinado e conhecido:</code> e <code>assinado e desconhecido:</code>, cada uma com o que o site faz (permitir, limitar, bloquear, em quais páginas).",
+          "texto": "Crie <code>politica-bots.md</code> com três linhas, uma por caso, começando por <code>anônimo:</code>, <code>assinado e conhecido:</code> e <code>assinado e desconhecido:</code>, cada uma com o que o site faz (permitir, limitar, bloquear, em quais páginas). Os prefixos ficam em português porque o comando de conferência procura por eles.",
           "pronto": "<code>grep -c -E \"^(anônimo|assinado e conhecido|assinado e desconhecido):\" politica-bots.md</code> → <code>3</code>."
         }
       ]

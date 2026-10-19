@@ -41,13 +41,13 @@
           "icone": "texto",
           "titulo": "Description",
           "sub": "poisoned",
-          "detalhe": "A hidden instruction in the name, the description, or a parameter's description of the tool (<i>tool poisoning</i>). Who attacks: the site itself, or a third-party script it loads."
+          "detalhe": "A hidden instruction in the name, the description, or a parameter description of the tool (<i>tool poisoning</i>). Who attacks: a malicious site that publishes the tool (§6.3.1.1). On your site, the same effect comes from a compromised third-party script (§6.4.1)."
         },
         {
           "icone": "chat",
           "titulo": "Output",
           "sub": "injected",
-          "detalhe": "An instruction inside what the tool returns: a review, a forum post, a comment. Who attacks: any visitor who writes on your site."
+          "detalhe": "An instruction inside what the tool returns: a review, a forum post, a comment. Who attacks: the malicious site itself or any visitor who writes content on your site."
         },
         {
           "icone": "alvo",
@@ -81,13 +81,13 @@
           "titulo": "OpenAI",
           "sub": "December 22, 2025 · reported",
           "texto": [
-            "OpenAI published \"Hardening Atlas against prompt injection\", about automated red team. Press coverage reports the phrase that the problem \"is unlikely to ever be fully solved\".",
+            "According to the press, OpenAI published \"Hardening Atlas against prompt injection\", about automated red teaming. Press coverage reports the line that the problem \"is unlikely to ever be fully solved\".",
             "The OpenAI page returned 403 when we tried to read it on October 19, 2026: it stays as reported, not confirmed at the source."
           ]
         },
         {
           "titulo": "The WebMCP spec",
-          "sub": "October 16, 2026",
+          "sub": "16/10/2026",
           "texto": [
             "Section 6 (Security and Privacy Considerations) is not normative. It describes the threats and proposes signals, like the annotations, with no guarantee at all.",
             "The part about origin boundaries (§6.3.4) is still just a pending note in the draft of October 16, 2026."
@@ -117,7 +117,7 @@
         "abas": [
           {
             "rot": "Captured output (October 19, 2026)",
-            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>In this capture, Playwright's Chromium 156 was already downloaded on the machine; the first time, the last command shows the download lines before <code>saída: 0</code>.</p>"
+            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>Path shortened with <code>~</code> in the capture. In it, Playwright's Chromium 156 was already downloaded on the machine; the first time, the last command shows the download lines before <code>saída: 0</code>.</p>"
           }
         ]
       }
@@ -185,14 +185,14 @@
           "id": "e2",
           "titulo": "E2 · Filter against five",
           "min": "3 min",
-          "texto": "Run the <b>filtro</b> block and read which ones passed.",
+          "texto": "Run the <b>filter</b> block and read which ones passed.",
           "pronto": "<code>passaram: 2 de 5</code> and <code>saída: 1</code>."
         },
         {
           "id": "e3",
           "titulo": "E3 · Your attack",
           "min": "10 min",
-          "texto": "Replace the text in the <b>meu ataque</b> block with an attack of your own, in Portuguese, with none of the words from the rules in <code>filtro.mjs</code>.",
+          "texto": "Replace the text in the <b>my attack</b> block with an attack of your own, in any language, that doesn't use any word from the rules in <code>filtro.mjs</code>.",
           "pronto": "<code>passaram: 1 de 1</code> with your text."
         }
       ]

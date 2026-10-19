@@ -149,7 +149,7 @@
         {
           "titulo": "Quando rodar",
           "texto": [
-            "A cada ferramenta nova, a cada atualização de dependência e quando a spec mudar. O WebMCP é rascunho: o origin trial vai até o Chrome 156 e a API já mudou de nome uma vez."
+            "A cada ferramenta nova, a cada atualização de dependência e quando a spec mudar. O WebMCP é rascunho: o origin trial vai até o Chrome 156 (em 19/10/2026) e a API já mudou de nome uma vez, de <code>navigator.modelContext</code> para <code>document.modelContext</code>."
           ]
         }
       ]
@@ -280,7 +280,7 @@
           "titulo": "E24 · Seu site e a data",
           "min": "30 min",
           "texto": "Rode a auditoria com <code>PAGINA</code> e <code>CATALOGO</code> do seu site, gere o plano acima e marque no calendário a próxima revisão.",
-          "pronto": "<code>PAGINA=[sua pasta] node scripts/auditar.mjs</code> grava um <code>relatorio-seguranca.md</code> com a data de hoje, e o <code>.ics</code> do plano está no seu calendário."
+          "pronto": "<code>PAGINA=[sua pasta] node scripts/auditar.mjs</code> e depois <code>head -1 relatorio-seguranca.md</code> → <code># Relatório de segurança — [data de hoje]</code>; <code>ls [sua pasta de downloads]/plano-*.ics</code> → o arquivo do plano."
         }
       ]
     },
@@ -322,7 +322,7 @@
             "Nunca, depois do primeiro 6/6"
           ],
           "certa": 0,
-          "explica": "Cada uma dessas mudanças pode abrir um furo que já estava fechado. O origin trial vai até o Chrome 156 e a API já mudou de nome uma vez.",
+          "explica": "Cada uma dessas mudanças pode abrir um furo que já estava fechado. Em 19/10/2026, o origin trial vai até o Chrome 156 e a API já mudou de nome uma vez (de <code>navigator.modelContext</code> para <code>document.modelContext</code>).",
           "ref": "passos"
         },
         {

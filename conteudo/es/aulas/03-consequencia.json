@@ -116,7 +116,7 @@
         "abas": [
           {
             "rot": "Salida capturada (19 de octubre de 2026)",
-            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nok    buscar_mentorias: só leitura, sem texto de terceiro\nok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint\nok    meus_agendamentos: só leitura, sem texto de terceiro\nok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada\nok    cancelar_agendamento: consequentialHint + confirmação; recusar não mudou nada\nRESULTADO: 0 falhas\nsaída: 0</pre><p>Antes do conserto, a mesma linha dizia <code>FALHA cancelar_agendamento: agiu sem pedir confirmação</code> (saída da aula 2).</p>"
+            "html": "<pre>== Chromium 156.0.8078.4 (Playwright) · modo: nativo\nok    buscar_mentorias: só leitura, sem texto de terceiro\nok    ler_avaliacoes: devolve texto de terceiro e está marcada com untrustedContentHint\nok    meus_agendamentos: só leitura, sem texto de terceiro\nok    agendar_mentoria: consequentialHint + confirmação; recusar não mudou nada\nok    cancelar_agendamento: consequentialHint + confirmação; recusar não mudou nada\nRESULTADO: 0 falhas\nsaída: 0</pre><p>Antes del arreglo, la misma línea decía <code>FALHA cancelar_agendamento: agiu sem pedir confirmação</code> (salida de la clase 2).</p>"
           }
         ]
       }
@@ -130,7 +130,7 @@
           "id": "e7",
           "titulo": "E7 · Arregla la cancelación",
           "min": "15 min",
-          "texto": "Pon <code>consequentialHint</code> y la confirmación en <code>cancelar_agendamento</code> y ejecuta el bloque <b>checar depois</b>.",
+          "texto": "Pon <code>consequentialHint</code> y la confirmación en <code>cancelar_agendamento</code> y ejecuta el bloque <b>checar después</b>.",
           "pronto": "<code>RESULTADO: 0 falhas</code> y <code>saída: 0</code>."
         },
         {

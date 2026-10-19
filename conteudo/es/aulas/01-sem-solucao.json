@@ -41,13 +41,13 @@
           "icone": "texto",
           "titulo": "Descripción",
           "sub": "envenenada",
-          "detalhe": "Instrucción escondida en el nombre, en la descripción o en la descripción de un parámetro de la tool (<i>tool poisoning</i>). Quién ataca: el propio sitio, o un script de terceros que este carga."
+          "detalhe": "Instrucción escondida en el nombre, en la descripción o en la descripción de un parámetro de la tool (<i>tool poisoning</i>). Quién ataca: un sitio malicioso que publica la tool (§6.3.1.1). En tu sitio, el mismo efecto viene de un script de terceros comprometido (§6.4.1)."
         },
         {
           "icone": "chat",
           "titulo": "Salida",
           "sub": "inyectada",
-          "detalhe": "Instrucción dentro de lo que devuelve la tool: una reseña, un post de foro, un comentario. Quién ataca: cualquier visitante que escribe en tu sitio."
+          "detalhe": "Instrucción dentro de lo que la tool devuelve: una reseña, un post de foro, un comentario. Quién ataca: el propio sitio malicioso o cualquier visitante que escribe contenido en tu sitio."
         },
         {
           "icone": "alvo",
@@ -81,7 +81,7 @@
           "titulo": "OpenAI",
           "sub": "22 de diciembre de 2025 · reportado",
           "texto": [
-            "OpenAI publicó \"Hardening Atlas against prompt injection\", sobre red team automatizado. La cobertura de la prensa reporta la frase según la cual el problema \"is unlikely to ever be fully solved\".",
+            "Según la prensa, OpenAI publicó \"Hardening Atlas against prompt injection\", sobre red team automatizado. La cobertura de la prensa recoge la frase de que el problema \"is unlikely to ever be fully solved\".",
             "La página de OpenAI respondió 403 cuando intentamos leerla el 19 de octubre de 2026: queda como reportado, no confirmado en la fuente."
           ]
         },
@@ -117,7 +117,7 @@
         "abas": [
           {
             "rot": "Salida capturada (19 de octubre de 2026)",
-            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>En esta captura, el Chromium 156 de Playwright ya estaba descargado en la máquina; la primera vez, el último comando muestra las líneas de descarga antes de <code>saída: 0</code>.</p>"
+            "html": "<pre>Cloning into '~/projetos/formacao-webmcp-seguranca-v72'...\n\nadded 19 packages, and audited 20 packages in 5s\n\n2 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\nsaída: 0</pre><p>Ruta abreviada con <code>~</code> en la captura. En ella el Chromium 156 de Playwright ya estaba descargado en la máquina; la primera vez, el último comando muestra las líneas de descarga antes del <code>saída: 0</code>.</p>"
           }
         ]
       }
@@ -135,7 +135,7 @@
         {
           "rot": "Archivo · kit/scripts/filtro.mjs",
           "icone": "arquivo",
-          "conteudo": "// filtro.mjs — un filtro de palabras \"anti-inyección\", de los que mucha gente escribe primero.\n// Sirve para probar el punto de la clase 1: el filtro atrapa el ataque conocido y deja pasar la variación.\n// No llama a ningún modelo: solo aplica las reglas al texto.\n// Uso: node scripts/filtro.mjs [arquivo]   (padrão: payloads/exemplos.txt; un ataque por bloque, separados por ---)\n// Salida 0 = el filtro bloqueó todo; 1 = algún ataque pasó.\nimport { readFileSync } from 'node:fs';\n\nconst REGRAS = [\n  /ignore (all )?(previous|prior) instructions/i,\n  /ignore as instru[çc][õo]es/i,\n  /\\bSYSTEM\\b/,\n  /<important>/i,\n  /END USER CONTENT/i\n];\n\nconst arquivo = process.argv[2] || new URL('../payloads/exemplos.txt', import.meta.url);\nconst blocos = readFileSync(arquivo, 'utf8')\n  .split(/^---\\s*$/m)\n  .map(b => b.split('\\n').filter(l => !l.startsWith('#')).join(' ').trim())\n  .filter(Boolean);\n\nlet passaram = 0;\nblocos.forEach((b, i) => {\n  const regra = REGRAS.find(r => r.test(b));\n  if (!regra) passaram++;\n  console.log(`${regra ? 'bloqueado' : 'PASSOU   '} ${i + 1}: ${b.slice(0, 60)}…`);\n});\nconsole.log(`passaram: ${passaram} de ${blocos.length}`);\nprocess.exit(passaram ? 1 : 0);"
+          "conteudo": "// filtro.mjs — un filtro de palabras \"anti-inyección\", de los que mucha gente escribe primero.\n// Sirve para probar el punto de la clase 1: el filtro atrapa el ataque conocido y deja pasar la variación.\n// No llama a ningún modelo: solo aplica las reglas al texto.\n// Uso: node scripts/filtro.mjs [archivo]   (por defecto: payloads/exemplos.txt; un ataque por bloque, separados por ---)\n// Salida 0 = el filtro bloqueó todo; 1 = algún ataque pasó.\nimport { readFileSync } from 'node:fs';\n\nconst REGRAS = [\n  /ignore (all )?(previous|prior) instructions/i,\n  /ignore as instru[çc][õo]es/i,\n  /\\bSYSTEM\\b/,\n  /<important>/i,\n  /END USER CONTENT/i\n];\n\nconst arquivo = process.argv[2] || new URL('../payloads/exemplos.txt', import.meta.url);\nconst blocos = readFileSync(arquivo, 'utf8')\n  .split(/^---\\s*$/m)\n  .map(b => b.split('\\n').filter(l => !l.startsWith('#')).join(' ').trim())\n  .filter(Boolean);\n\nlet passaram = 0;\nblocos.forEach((b, i) => {\n  const regra = REGRAS.find(r => r.test(b));\n  if (!regra) passaram++;\n  console.log(`${regra ? 'bloqueado' : 'PASSOU   '} ${i + 1}: ${b.slice(0, 60)}…`);\n});\nconsole.log(`passaram: ${passaram} de ${blocos.length}`);\nprocess.exit(passaram ? 1 : 0);"
         }
       ],
       "saida": {
@@ -192,7 +192,7 @@
           "id": "e3",
           "titulo": "E3 · Tu ataque",
           "min": "10 min",
-          "texto": "Cambia el texto del bloque <b>meu ataque</b> por un ataque tuyo, en portugués, sin ninguna palabra de las reglas de <code>filtro.mjs</code>.",
+          "texto": "Cambia el texto del bloque <b>mi ataque</b> por un ataque tuyo, en cualquier idioma, que no use ninguna palabra de las reglas de <code>filtro.mjs</code>.",
           "pronto": "<code>passaram: 1 de 1</code> con tu texto."
         }
       ]

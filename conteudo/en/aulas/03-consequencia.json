@@ -106,7 +106,7 @@
           "conteudo": "      annotations: { consequentialHint: true },              // lesson 3: warns that the action has consequences\n      execute: util(async ({ codigo }, { signal }) => {\n        const ag = agenda.agendamentos().find(a => a.codigo === codigo);\n        if (!ag) throw new Error(`agendamento não encontrado: ${codigo}`);\n        // the question states the target and the effect in full; aborting the run (signal) counts as \"no\"\n        const ok = await ui.pedirConfirmacao(`Cancelar o agendamento ${ag.codigo} (${ag.id}, ${ag.nome})? A vaga volta para a agenda.`, signal);\n        if (!ok) return { cancelado: false, motivo: 'a pessoa recusou na tela' };\n        agenda.cancelar(codigo);\n        ui.atualizar();\n        return { cancelado: true, agendamento: ag };\n      })"
         },
         {
-          "rot": "Terminal · checar depois",
+          "rot": "Terminal · check afterward",
           "icone": "terminal",
           "conteudo": "cd ~/projetos/formacao-webmcp-seguranca-v72/kit\nnode scripts/checar.mjs; echo \"saída: $?\""
         }
